@@ -1,0 +1,40 @@
+abstract Service
+    cpu: integer
+    machine -> Server
+
+MailService : Service
+    [cpu = 8]
+
+SearchService : Service
+    [cpu = 7]
+
+CalendarService : Service
+    [cpu = 5]
+
+DriveService : Service
+    [cpu = 4]
+
+GroupsService : Service
+    [cpu = 5]
+    
+emptyServices : Service 0
+
+abstract Server
+    cpuLimit : integer
+
+    services -> Service* = Mail, Search, Calendar, Drive, Groups
+
+    Mail -> Service ? = (if (MailService.machine = this) then MailService else emptyServices)
+    Search -> Service ? = (if (SearchService.machine = this) then SearchService else emptyServices)
+    Calendar -> Service ? = (if (CalendarService.machine = this) then CalendarService else emptyServices)
+    Drive -> Service ? = (if (DriveService.machine = this) then DriveService else emptyServices)
+    Groups -> Service ? = (if (GroupsService.machine = this) then GroupsService else emptyServices)
+
+    total_cpu : integer = sum services.cpu
+    [total_cpu <= this.cpuLimit]
+
+GoogleCA : Server
+    [cpuLimit = 20]
+    
+GoogleNY : Server
+    [cpuLimit = 10]

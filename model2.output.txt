@@ -1,0 +1,76 @@
+ClaferIDE> Setting the individual scope...
+Scope of services (c0_services) changed to 10
+=== Instance 1 ===
+
+Task
+  GoogleCA
+    Mail
+      cpu$1 = 8
+    Search
+      cpu$2 = 7
+    Calendar
+      cpu$3 = 5
+    cpuLimit$1 = 20
+    services$1 = Calendar
+    services$2 = Mail
+    services$3 = Search
+    total_cpu$1 = 20
+  GoogleNY
+    Drive
+      cpu$4 = 4
+    Groups
+      cpu$5 = 5
+    cpuLimit$2 = 10
+    services$4 = Drive
+    services$5 = Groups
+    total_cpu$2 = 9
+
+=== Instance 2 ===
+
+Task
+  GoogleCA
+    Mail
+      cpu$1 = 8
+    Search
+      cpu$2 = 7
+    Groups
+      cpu$3 = 5
+    cpuLimit$1 = 20
+    services$1 = Groups
+    services$2 = Mail
+    services$3 = Search
+    total_cpu$1 = 20
+  GoogleNY
+    Calendar
+      cpu$4 = 5
+    Drive
+      cpu$5 = 4
+    cpuLimit$2 = 10
+    services$4 = Calendar
+    services$5 = Drive
+    total_cpu$2 = 9
+
+=== Instance 3 ===
+
+Task
+  GoogleCA
+    Mail
+      cpu$1 = 8
+    Search
+      cpu$2 = 7
+    Drive
+      cpu$3 = 4
+    cpuLimit$1 = 20
+    services$1 = Drive
+    services$2 = Mail
+    services$3 = Search
+    total_cpu$1 = 19
+  GoogleNY
+    Calendar
+      cpu$4 = 5
+    Groups
+      cpu$5 = 5
+    cpuLimit$2 = 10
+    services$4 = Calendar
+    services$5 = Groups
+    total_cpu$2 = 10

@@ -1,0 +1,166 @@
+============ ClaferIG=============================
+
+Scope of Service::cpu (c0_cpu) changed to 5
+Scope of services (c0_services) changed to 5
+Scope of Service (c0_Service) changed to 5
+=== Instance 1 ===
+
+Task
+  GoogleCA
+    Mail
+      cpu$1 = 8
+    Search
+      cpu$2 = 7
+    Groups
+      cpu$3 = 5
+    cpuLimit$1 = 20
+    services$1 = Groups
+    services$2 = Mail
+    services$3 = Search
+    total_cpu$1 = 20
+  GoogleNY
+    Calendar
+      cpu$4 = 5
+    Drive
+      cpu$5 = 4
+    cpuLimit$2 = 10
+    services$4 = Calendar
+    services$5 = Drive
+    total_cpu$2 = 9
+
+=== Instance 2 ===
+
+Task
+  GoogleCA
+    Mail
+      cpu$1 = 8
+    Search
+      cpu$2 = 7
+    Calendar
+      cpu$3 = 5
+    cpuLimit$1 = 20
+    services$1 = Calendar
+    services$2 = Mail
+    services$3 = Search
+    total_cpu$1 = 20
+  GoogleNY
+    Drive
+      cpu$4 = 4
+    Groups
+      cpu$5 = 5
+    cpuLimit$2 = 10
+    services$4 = Drive
+    services$5 = Groups
+    total_cpu$2 = 9
+
+=== Instance 3 ===
+
+Task
+  GoogleCA
+    Mail
+      cpu$1 = 8
+    Search
+      cpu$2 = 7
+    Drive
+      cpu$3 = 4
+    cpuLimit$1 = 20
+    services$1 = Drive
+    services$2 = Mail
+    services$3 = Search
+    total_cpu$1 = 19
+  GoogleNY
+    Calendar
+      cpu$4 = 5
+    Groups
+      cpu$5 = 5
+    cpuLimit$2 = 10
+    services$4 = Calendar
+    services$5 = Groups
+    total_cpu$2 = 10
+
+No more instances found. Try increasing scope to get more instances.
+
+======== ChocoIG ========
+
+ClaferIDE> Running the chosen instance generator...
+No more instances found. Please consider increasing scopes
+ClaferIDE> Setting the individual scope...
+Individual scope: scope c0_services 5
+Model is ready after the scope change
+No more instances found. Please consider increasing scopes
+ClaferIDE> Setting integer bounds...
+Max Integer: maxInt 127
+Model is ready after the scope change
+=== Instance 1 ===
+c0_Task#0
+    c0_GoogleCA#0
+        c0_Mail#0
+            c0_cpu#0 = 8
+        c0_Search#0
+            c0_cpu#1 = 7
+        c0_Drive#0
+            c0_cpu#3 = 4
+        c0_cpuLimit#0 = 20
+        c0_services#0 = c0_Mail#0
+        c0_services#1 = c0_Search#0
+        c0_services#2 = c0_Drive#0
+        c0_total_cpu#0 = 19
+    c0_GoogleNY#0
+        c0_Calendar#0
+            c0_cpu#2 = 5
+        c0_Groups#0
+            c0_cpu#4 = 5
+        c0_cpuLimit#1 = 10
+        c0_services#3 = c0_Calendar#0
+        c0_services#4 = c0_Groups#0
+        c0_total_cpu#1 = 10
+
+=== Instance 2 ===
+c0_Task#0
+    c0_GoogleCA#0
+        c0_Mail#0
+            c0_cpu#0 = 8
+        c0_Search#0
+            c0_cpu#1 = 7
+        c0_Calendar#0
+            c0_cpu#2 = 5
+        c0_cpuLimit#0 = 20
+        c0_services#0 = c0_Mail#0
+        c0_services#1 = c0_Search#0
+        c0_services#2 = c0_Calendar#0
+        c0_total_cpu#0 = 20
+    c0_GoogleNY#0
+        c0_Drive#0
+            c0_cpu#3 = 4
+        c0_Groups#0
+            c0_cpu#4 = 5
+        c0_cpuLimit#1 = 10
+        c0_services#3 = c0_Drive#0
+        c0_services#4 = c0_Groups#0
+        c0_total_cpu#1 = 9
+
+=== Instance 3 ===
+c0_Task#0
+    c0_GoogleCA#0
+        c0_Mail#0
+            c0_cpu#0 = 8
+        c0_Search#0
+            c0_cpu#1 = 7
+        c0_Groups#0
+            c0_cpu#4 = 5
+        c0_cpuLimit#0 = 20
+        c0_services#0 = c0_Mail#0
+        c0_services#1 = c0_Search#0
+        c0_services#2 = c0_Groups#0
+        c0_total_cpu#0 = 20
+    c0_GoogleNY#0
+        c0_Calendar#0
+            c0_cpu#2 = 5
+        c0_Drive#0
+            c0_cpu#3 = 4
+        c0_cpuLimit#1 = 10
+        c0_services#3 = c0_Calendar#0
+        c0_services#4 = c0_Drive#0
+        c0_total_cpu#1 = 9
+
+No more instances found. Please consider increasing scopes

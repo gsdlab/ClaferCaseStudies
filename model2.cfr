@@ -1,0 +1,48 @@
+abstract Service
+    cpu: integer
+
+abstract MailService : Service
+    [cpu = 8]
+
+abstract SearchService : Service
+    [cpu = 7]
+
+abstract CalendarService : Service
+    [cpu = 5]
+
+abstract DriveService : Service
+    [cpu = 4]
+
+abstract GroupsService : Service
+    [cpu = 5]
+
+abstract Server
+    Mail : MailService ?
+        [this in services]
+        
+    Search : SearchService ?
+        [this in services]
+
+    Calendar : CalendarService ?
+        [this in services]
+
+    Drive : DriveService ?
+        [this in services]
+
+    Groups : GroupsService ?
+        [this in services]
+
+    cpuLimit : integer
+    services -> Service*
+    total_cpu : integer = sum services.cpu
+    [total_cpu <= this.cpuLimit]
+
+Task
+    GoogleCA : Server
+        [cpuLimit = 20]
+    
+    GoogleNY : Server
+        [cpuLimit = 10]
+        
+    [#GoogleCA.services + #GoogleNY.services = 5]
+    [all service : Service | (service in GoogleCA.services) <=> !(service in GoogleNY.services) ]
