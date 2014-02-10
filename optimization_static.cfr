@@ -1,7 +1,7 @@
 abstract Service
     cpu: integer
     machine -> Machine // the -> means every service must be allocated to some machine 
-
+    [ this in machine.services ]
 // List of Services
 
 MailService : Service
@@ -19,18 +19,10 @@ DriveService : Service
 GroupsService : Service
     [cpu = 5]
 
-// an empty set of services: type-checks well    
-emptyServices : Service 0
-
 // Machine
 abstract Machine
-    services -> Service* = Mail, Search, Calendar, Drive, Groups
-
-    Mail -> Service ? = (if (MailService.machine = this) then MailService else emptyServices)
-    Search -> Service ? = (if (SearchService.machine = this) then SearchService else emptyServices)
-    Calendar -> Service ? = (if (CalendarService.machine = this) then CalendarService else emptyServices)
-    Drive -> Service ? = (if (DriveService.machine = this) then DriveService else emptyServices)
-    Groups -> Service ? = (if (GroupsService.machine = this) then GroupsService else emptyServices)
+    services -> Service*
+        [this.machine = parent]
 
     total_cpu : integer = sum services.cpu
     [total_cpu <= this.cpuLimit]

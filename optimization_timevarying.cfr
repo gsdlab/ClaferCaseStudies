@@ -1,0 +1,90 @@
+enum Time = Morning | Midday | Evening
+
+abstract TimedRequirement
+    cpu: integer
+    time -> Time
+
+abstract Service
+    requirements -> TimedRequirement*
+    machine -> Machine
+    [this in machine.services]
+
+MailService : Service 2
+    reqMorning : TimedRequirement
+        [time = Morning]
+        [cpu = 4]
+    reqMidday : TimedRequirement
+        [time = Midday]
+        [cpu = 3]
+    reqEvening : TimedRequirement
+        [time = Evening]
+        [cpu = 3]
+    [requirements = reqMorning, reqMidday, reqEvening]
+
+SearchService : Service 2
+    reqMorning : TimedRequirement
+        [time = Morning]
+        [cpu = 4]
+    reqMidday : TimedRequirement
+        [time = Midday]
+        [cpu = 4]
+    reqEvening : TimedRequirement
+        [time = Evening]
+        [cpu = 6]
+    [requirements = reqMorning, reqMidday, reqEvening]
+
+DriveService : Service 1
+    reqMorning : TimedRequirement
+        [time = Morning]
+        [cpu = 2]
+    reqMidday : TimedRequirement
+        [time = Midday]
+        [cpu = 4]
+    reqEvening : TimedRequirement
+        [time = Evening]
+        [cpu = 3]
+    [requirements = reqMorning, reqMidday, reqEvening]
+
+// Machine
+abstract Machine
+    services -> Service*
+        [this.machine = parent]
+
+    [all s : services | some r : TimedRequirement | r in s.requirements && r in requirementsMorning]
+    [all s : services | some r : TimedRequirement | r in s.requirements && r in requirementsMidday]
+    [all s : services | some r : TimedRequirement | r in s.requirements && r in requirementsEvening]
+
+    requirementsMorning -> TimedRequirement*
+        [this.time = Morning]
+        
+    requirementsMidday -> TimedRequirement*
+        [this.time = Midday]
+
+    requirementsEvening -> TimedRequirement*
+        [this.time = Evening]
+
+    [sum requirementsMorning.cpu <= this.cpuLimit]
+    [sum requirementsMidday.cpu <= this.cpuLimit]
+    [sum requirementsEvening.cpu <= this.cpuLimit]
+
+    cpuLimit : integer
+    isFree? 
+    [isFree <=> #services = 0]
+    
+// List of Machines
+
+GoogleCA : Machine
+    [cpuLimit = 10]
+
+GoogleNY : Machine
+    [cpuLimit = 16]
+
+GoogleTX : Machine
+    [cpuLimit = 14]
+
+abstract Task
+    
+    total_free : integer = #Machine.isFree
+
+MyTask: Task
+<<max MyTask.total_free>>
