@@ -1,43 +1,47 @@
 abstract Service
-    cpu: integer
-    machine -> Machine // the -> means every service must be allocated to some machine 
+    machine -> Machine
     [this in machine.services]
+
+    // isap properties
+
+    memoryPressure : integer
+    memorySensivity : integer
+
+    // isap constraints
+
+    [(sum machine.services.memoryPressure) - memoryPressure <= memorySensivity]
+
 // List of Services
 
-MailService : Service 2
-    [cpu = 4]
+MailService : Service
+    [memoryPressure = 4]
+    [memorySensivity = 6]
 
-SearchService : Service 2
-    [cpu = 3]
+SearchService : Service
+    [memoryPressure = 4]
+    [memorySensivity = 6]
 
-CalendarService : Service 2
-    [cpu = 1]
+CalendarService : Service
+    [memoryPressure = 4]
+    [memorySensivity = 6]
 
-DriveService : Service 1
-    [cpu = 2]
+DriveService : Service
+    [memoryPressure = 4]
+    [memorySensivity = 6]
 
 // Machine
 abstract Machine
     services -> Service*
         [this.machine = parent]
-        
-    total_cpu : integer = sum services.cpu
-    [total_cpu <= this.cpuLimit]
 
-    cpuLimit : integer
     isFree? 
     [isFree <=> #services = 0]
     
 // List of Machines
 
 GoogleCA : Machine
-    [cpuLimit = 10]
-
 GoogleNY : Machine
-    [cpuLimit = 16]
-
 GoogleTX : Machine
-    [cpuLimit = 14]
 
 abstract Task
     
