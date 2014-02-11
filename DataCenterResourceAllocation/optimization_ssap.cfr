@@ -1,0 +1,48 @@
+abstract Service
+    cpu: integer
+    machine -> Machine // the -> means every service must be allocated to some machine 
+    [ this in machine.services ]
+// List of Services
+
+MailService : Service
+    [cpu = 8]
+
+SearchService : Service
+    [cpu = 7]
+
+CalendarService : Service
+    [cpu = 5]
+
+DriveService : Service
+    [cpu = 4]
+
+GroupsService : Service
+    [cpu = 5]
+
+// Machine
+abstract Machine
+    services -> Service*
+        [this.machine = parent]
+
+    total_cpu : integer = sum services.cpu
+    [total_cpu <= this.cpuLimit]
+
+    cpuLimit : integer
+    isFree : integer = (if (#this.services = 0) then 1 else 0)
+
+// List of Machines
+
+GoogleCA : Machine
+    [cpuLimit = 20]
+
+GoogleNY : Machine
+    [cpuLimit = 10]
+
+GoogleTX : Machine
+    [cpuLimit = 11]
+
+abstract Task
+    total_free : integer = sum Machine.isFree
+
+MyTask: Task
+<<max MyTask.total_free>>
