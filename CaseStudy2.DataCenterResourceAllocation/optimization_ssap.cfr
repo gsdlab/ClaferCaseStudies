@@ -1,48 +1,90 @@
+//=======================================================
+// Generic model
+//=======================================================
+
+// ------------------
+// Service prototype
+// ------------------
+
 abstract Service
-    cpu: integer
-    machine -> Machine // the -> means every service must be allocated to some machine 
-    [ this in machine.services ]
-// List of Services
+    requirements: Requirements  // resources required by a service
+    machine -> Machine          // machine the service is allocated to 
+    [this in machine.services]  // inverse relationship constraint
 
-MailService : Service
-    [cpu = 8]
+// ----------------------------------
+// Requirements and Resources prototypes
+// ----------------------------------
 
-SearchService : Service
-    [cpu = 7]
+abstract Requirements
+    cpu ->> integer
 
-CalendarService : Service
-    [cpu = 5]
+abstract Resources: Requirements
 
-DriveService : Service
-    [cpu = 4]
+// ------------------
+// Machine prototype
+// ------------------
 
-GroupsService : Service
-    [cpu = 5]
-
-// Machine
 abstract Machine
-    services -> Service*
-        [this.machine = parent]
 
-    total_cpu : integer = sum services.cpu
-    [total_cpu <= this.cpuLimit]
+    services -> Service*        // set of services allocated to this machine
+        [this.machine = Machine] // inverse relationship constraint
+        
+    isFree? // boolean showing whether the machine is free or not
+    [isFree <=> no services] // being free means no services allocated
 
-    cpuLimit : integer
-    isFree : integer = (if (#this.services = 0) then 1 else 0)
+    limits : Resources
 
-// List of Machines
+    // constraints for limiting total requirements
+    //---------------------------------------------
+    
+    utilization : Resources
+        [cpu = sum services.requirements.cpu]
+        [cpu < limits.cpu]
 
-GoogleCA : Machine
-    [cpuLimit = 20]
 
-GoogleNY : Machine
-    [cpuLimit = 10]
+// -----------------------------------
+// Optimization goals and constraints
+// -----------------------------------
 
-GoogleTX : Machine
-    [cpuLimit = 11]
-
-abstract Task
-    total_free : integer = sum Machine.isFree
+abstract Task   
+    // total number of machines free
+    total_free : integer = #Machine.isFree
 
 MyTask: Task
 <<max MyTask.total_free>>
+
+//=======================================================
+// SSAP problem specifics
+//=======================================================
+
+// nothing
+
+
+//=======================================================
+// Particular data (machines and services)
+//=======================================================
+
+// machines:
+
+GoogleCA : Machine
+    [limits.cpu = 10]
+
+GoogleNY : Machine
+    [limits.cpu = 16]
+
+GoogleTX : Machine
+    [limits.cpu = 14]
+
+// services:
+
+MailService : Service
+    [requirements.cpu = 4]
+
+SearchService : Service
+    [requirements.cpu = 3]
+
+CalendarService : Service
+    [requirements.cpu = 1]
+
+DriveService : Service
+    [requirements.cpu = 2]

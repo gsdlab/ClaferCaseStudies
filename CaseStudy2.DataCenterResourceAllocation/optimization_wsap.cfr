@@ -1,47 +1,90 @@
+//=======================================================
+// Generic model
+//=======================================================
+
+// ------------------
+// Service prototype
+// ------------------
+
 abstract Service
-    cpu: integer
-    machine -> Machine // the -> means every service must be allocated to some machine 
-    [this in machine.services]
-// List of Services
+    requirements: Requirements  // resources required by a service
+    machine -> Machine          // machine the service is allocated to 
+    [this in machine.services]  // inverse relationship constraint
 
-MailService : Service 2
-    [cpu = 4]
+// ----------------------------------
+// Requirements and Resources prototypes
+// ----------------------------------
 
-SearchService : Service 2
-    [cpu = 3]
+abstract Requirements
+    cpu ->> integer
 
-CalendarService : Service 2
-    [cpu = 1]
+abstract Resources: Requirements
+    
+// ------------------
+// Machine prototype
+// ------------------
 
-DriveService : Service 1
-    [cpu = 2]
-
-// Machine
 abstract Machine
-    services -> Service*
-        [this.machine = parent]
+
+    services -> Service*        // set of services allocated to this machine
+        [this.machine = Machine] // inverse relationship constraint
         
-    total_cpu : integer = sum services.cpu
-    [total_cpu <= this.cpuLimit]
+    isFree? // boolean showing whether the machine is free or not
+    [isFree <=> no services] // being free means no services allocated
 
-    cpuLimit : integer
-    isFree? 
-    [isFree <=> #services = 0]
+    limits : Resources
+
+    // constraints for limiting total requirements
+    //---------------------------------------------
     
-// List of Machines
+    utilization : Resources
+        [cpu = sum services.requirements.cpu]
+        [cpu < limits.cpu]
 
-GoogleCA : Machine
-    [cpuLimit = 10]
 
-GoogleNY : Machine
-    [cpuLimit = 16]
+// -----------------------------------
+// Optimization goals and constraints
+// -----------------------------------
 
-GoogleTX : Machine
-    [cpuLimit = 14]
-
-abstract Task
-    
+abstract Task   
+    // total number of machines free
     total_free : integer = #Machine.isFree
 
 MyTask: Task
 <<max MyTask.total_free>>
+
+//=======================================================
+// WSAP problem specifics
+//=======================================================
+
+// nothing: just showing clafer cardinalities
+
+
+//=======================================================
+// Particular data (machines and services)
+//=======================================================
+
+// machines:
+
+GoogleCA : Machine
+    [limits.cpu = 10]
+
+GoogleNY : Machine
+    [limits.cpu = 16]
+
+GoogleTX : Machine
+    [limits.cpu = 14]
+
+// services:
+
+MailService : Service 2
+    [requirements.cpu = 4]
+
+SearchService : Service 2
+    [requirements.cpu = 3]
+
+CalendarService : Service 2
+    [requirements.cpu = 1]
+
+DriveService : Service 1
+    [requirements.cpu = 2]

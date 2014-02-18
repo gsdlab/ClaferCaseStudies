@@ -1,90 +1,104 @@
-enum Time = Morning | Midday | Evening
+//=======================================================
+// Generic model customized to handle time-varied requirements
+//=======================================================
 
-abstract TimedRequirement
-    cpu: integer
-    time -> Time
+// ------------------
+// Service prototype
+// ------------------
 
 abstract Service
-    requirements -> TimedRequirement*
-    machine -> Machine
-    [this in machine.services]
+    requirements: Requirements  // resources required by a service
+    machine -> Machine          // machine the service is allocated to 
+    [this in machine.services]  // inverse relationship constraint
 
-MailService : Service 2
-    reqMorning : TimedRequirement
-        [time = Morning]
-        [cpu = 4]
-    reqMidday : TimedRequirement
-        [time = Midday]
-        [cpu = 3]
-    reqEvening : TimedRequirement
-        [time = Evening]
-        [cpu = 3]
-    [requirements = reqMorning, reqMidday, reqEvening]
+// ----------------------------------
+// Requirements and Resources prototypes
+// ----------------------------------
 
-SearchService : Service 2
-    reqMorning : TimedRequirement
-        [time = Morning]
-        [cpu = 4]
-    reqMidday : TimedRequirement
-        [time = Midday]
-        [cpu = 4]
-    reqEvening : TimedRequirement
-        [time = Evening]
-        [cpu = 6]
-    [requirements = reqMorning, reqMidday, reqEvening]
+abstract Requirements
+    morning_cpu ->> integer
+    midday_cpu ->> integer
+    evening_cpu ->> integer
+    night_cpu ->> integer
 
-DriveService : Service 1
-    reqMorning : TimedRequirement
-        [time = Morning]
-        [cpu = 2]
-    reqMidday : TimedRequirement
-        [time = Midday]
-        [cpu = 4]
-    reqEvening : TimedRequirement
-        [time = Evening]
-        [cpu = 3]
-    [requirements = reqMorning, reqMidday, reqEvening]
+abstract Resources
+    cpu ->> integer
 
-// Machine
+// ------------------
+// Machine prototype
+// ------------------
+
 abstract Machine
-    services -> Service*
-        [this.machine = parent]
 
-    [all s : services | some r : TimedRequirement | r in s.requirements && r in requirementsMorning]
-    [all s : services | some r : TimedRequirement | r in s.requirements && r in requirementsMidday]
-    [all s : services | some r : TimedRequirement | r in s.requirements && r in requirementsEvening]
-
-    requirementsMorning -> TimedRequirement*
-        [this.time = Morning]
+    services -> Service*        // set of services allocated to this machine
+        [this.machine = Machine] // inverse relationship constraint
         
-    requirementsMidday -> TimedRequirement*
-        [this.time = Midday]
+    isFree? // boolean showing whether the machine is free or not
+    [isFree <=> no services] // being free means no services allocated
 
-    requirementsEvening -> TimedRequirement*
-        [this.time = Evening]
+    limits : Resources
 
-    [sum requirementsMorning.cpu <= this.cpuLimit]
-    [sum requirementsMidday.cpu <= this.cpuLimit]
-    [sum requirementsEvening.cpu <= this.cpuLimit]
-
-    cpuLimit : integer
-    isFree? 
-    [isFree <=> #services = 0]
+    // constraints for limiting total requirements
+    //---------------------------------------------
     
-// List of Machines
+    morning_utilization : Resources
+        [cpu = sum services.requirements.morning_cpu]
+        [cpu < limits.cpu]
 
-GoogleCA : Machine
-    [cpuLimit = 10]
+    midday_utilization : Resources
+        [cpu = sum services.requirements.midday_cpu]
+        [cpu < limits.cpu]
 
-GoogleNY : Machine
-    [cpuLimit = 16]
+    evening_utilization : Resources
+        [cpu = sum services.requirements.evening_cpu]
+        [cpu < limits.cpu]
 
-GoogleTX : Machine
-    [cpuLimit = 14]
+    night_utilization : Resources
+        [cpu = sum services.requirements.night_cpu]
+        [cpu < limits.cpu]
 
-abstract Task
-    
+// -----------------------------------
+// Optimization goals and constraints
+// -----------------------------------
+
+abstract Task   
+    // total number of machines free
     total_free : integer = #Machine.isFree
 
 MyTask: Task
 <<max MyTask.total_free>>
+
+//=======================================================
+// Particular data (machines and services)
+//=======================================================
+
+// machines:
+
+GoogleCA : Machine
+    [limits.cpu = 10]
+
+GoogleNY : Machine
+    [limits.cpu = 16]
+
+GoogleTX : Machine
+    [limits.cpu = 14]
+
+// services:
+
+MailService : Service
+    [requirements.morning_cpu = 5]
+    [requirements.midday_cpu = 4]
+    [requirements.evening_cpu = 5]
+    [requirements.night_cpu = 1]
+
+SearchService : Service
+    [requirements.morning_cpu = 7]
+    [requirements.midday_cpu = 7]
+    [requirements.evening_cpu = 8]
+    [requirements.night_cpu = 3]
+
+CalendarService : Service
+    [requirements.morning_cpu = 2]
+    [requirements.midday_cpu = 2]
+    [requirements.evening_cpu = 2]
+    [requirements.night_cpu = 1]
