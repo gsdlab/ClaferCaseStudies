@@ -1,1 +1,82 @@
-// placeholder
+abstract Component
+
+abstract CommunicationUnit
+    component -> Component
+    rate ->> integer
+    bus ->> Bus
+
+// =====================================================================
+// Primitive types: SoftwareComponent, HardwareComponent and Bus
+// =====================================================================
+
+abstract SoftwareComponent: Component
+    target -> HardwareComponent  // hardware this software component is mapped to
+    [this in target.software]  // inverse relationship constraint
+    communication -> CommunicationUnit*
+
+abstract HardwareComponent: Component
+    software -> SoftwareComponent* // the software it contains
+    mappable?
+    [no mappable => no software]
+    cost ->> integer // every hardware component has a cost
+
+abstract Bus : HardwareComponent
+    [no mappable]
+    capacity ->> integer
+
+//=============================================
+// Custom types
+//=============================================
+
+abstract ECU : HardwareComponent
+    [mappable]
+
+abstract Device : HardwareComponent
+
+abstract NormalSensor : Device
+    [no mappable]
+
+abstract SmartSensor : Device
+    [mappable]
+
+//----------------------------------------------
+
+abstract SoftwareControl : SoftwareComponent
+    ram ->> integer
+
+abstract ECUWithRAM : ECU
+    ram ->> integer
+
+//==================================
+// Concrete instances
+//==================================
+
+// Hardware: 
+
+DoorController : ECUWithRAM
+    [ram = 32]
+    [cost = 20]
+
+SmartDoorSensor : SmartSensor
+    [cost = 5]
+
+LINBus : Bus
+    [capacity = 140]
+
+// Software: 
+
+DoorSensorSoftware: SoftwareComponent
+    linkToControl : CommunicationUnit
+        [component = PowerWindowControl]
+        [rate = 120]
+    [communication = linkToControl]
+    [target = SmartDoorSensor]
+
+PowerWindowControl: SoftwareControl
+    [target in ECU]
+    typecastedTarget -> ECUWithRAM
+    [typecastedTarget = target]
+    [this.ram <= typecastedTarget.ram]
+    [ram = 16]
+
+[all c : SoftwareComponent | all link : c.communication | (link.rate <= link.bus.capacity)]
