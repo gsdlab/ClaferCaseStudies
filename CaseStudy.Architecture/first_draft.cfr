@@ -1,9 +1,11 @@
 abstract Component
 
 abstract CommunicationUnit
-    component -> Component
+    start -> Component
+    end -> Component
     rate ->> integer
-    bus ->> Bus
+    bus -> Bus ?
+    [bus => (this in bus.links)]
 
 // =====================================================================
 // Primitive types: SoftwareComponent, HardwareComponent and Bus
@@ -13,9 +15,12 @@ abstract SoftwareComponent: Component
     target -> HardwareComponent  // hardware this software component is mapped to
     [this in target.software]  // inverse relationship constraint
     communication -> CommunicationUnit*
+        [this.start = SoftwareComponent]
 
 abstract HardwareComponent: Component
     software -> SoftwareComponent* // the software it contains
+        [this.target = HardwareComponent] // inverse relationship constraint
+
     mappable?
     [no mappable => no software]
     cost ->> integer // every hardware component has a cost
@@ -23,6 +28,8 @@ abstract HardwareComponent: Component
 abstract Bus : HardwareComponent
     [no mappable]
     capacity ->> integer
+    links ->> CommunicationUnit
+        [this.bus = Bus] // inverse relationship constraint
 
 //=============================================
 // Custom types
@@ -54,21 +61,26 @@ abstract ECUWithRAM : ECU
 // Hardware: 
 
 DoorController : ECUWithRAM
+    [ram = 16]
+    [cost = 8]
+
+DoorController2 : ECUWithRAM
     [ram = 32]
-    [cost = 20]
+    [cost = 10]
 
 SmartDoorSensor : SmartSensor
     [cost = 5]
 
 LINBus : Bus
-    [capacity = 140]
+    [cost = 2]
+    [capacity = 10]
 
 // Software: 
 
 DoorSensorSoftware: SoftwareComponent
     linkToControl : CommunicationUnit
-        [component = PowerWindowControl]
-        [rate = 120]
+        [end = PowerWindowControl]
+        [rate = 8]
     [communication = linkToControl]
     [target = SmartDoorSensor]
 
@@ -79,4 +91,10 @@ PowerWindowControl: SoftwareControl
     [this.ram <= typecastedTarget.ram]
     [ram = 16]
 
-[all c : SoftwareComponent | all link : c.communication | (link.rate <= link.bus.capacity)]
+[all b : Bus | (sum b.links.rate) <= b.capacity] // bus capacity constraint
+[all c : SoftwareComponent | all link: c.communication | 
+    (link.end.target = target) || (link.bus && ____)] 
+
+// link constraint: all communicating software components are either:
+// 1) located on the same ECU
+// 2) or communicating through a bus
