@@ -1,11 +1,11 @@
 abstract Component
 
-abstract CommunicationUnit
-    start -> Component
-    end -> Component
+abstract Flow
+    start -> SoftwareComponent
+    end -> SoftwareComponent
     rate ->> integer
-    bus -> Bus ?
-    [bus => (this in bus.links)]
+    bus -> Bus ? // the bus that implements the flow
+    [bus => (this in bus.flows)]
 
 // =====================================================================
 // Primitive types: SoftwareComponent, HardwareComponent and Bus
@@ -14,8 +14,6 @@ abstract CommunicationUnit
 abstract SoftwareComponent: Component
     target -> HardwareComponent  // hardware this software component is mapped to
     [this in target.software]  // inverse relationship constraint
-    communication -> CommunicationUnit*
-        [this.start = SoftwareComponent]
 
 abstract HardwareComponent: Component
     software -> SoftwareComponent* // the software it contains
@@ -28,8 +26,15 @@ abstract HardwareComponent: Component
 abstract Bus : HardwareComponent
     [no mappable]
     capacity ->> integer
-    links ->> CommunicationUnit
-        [this.bus = Bus] // inverse relationship constraint
+    flows -> Flow* // an inverse sowing what flows the bus implements
+        [this.bus = Bus]  // inverse relationship constraint
+
+    components -> HardwareComponent* // the components the bus connects
+    [components = flows.start.target ++ flows.end.target]
+
+abstract SoftwareTopology: Component
+    components -> SoftwareComponent*
+    flows -> Flow*
 
 //=============================================
 // Custom types
@@ -53,6 +58,15 @@ abstract SoftwareControl : SoftwareComponent
 
 abstract ECUWithRAM : ECU
     ram ->> integer
+
+//----------- constraints --------------------
+
+[all b : Bus | (sum b.flows.rate) <= b.capacity] // bus capacity constraint
+[all c : SoftwareTopology | all flow: c.flows | 
+    ( !flow.bus && (flow.start.target = flow.end.target)) // located on the same ECU, and there is no bus
+    || 
+    (  flow.bus && (flow.start.target in flow.bus.components) && (flow.end.target in flow.bus.components))] 
+        // communicating through a bus
 
 //==================================
 // Concrete instances
@@ -78,11 +92,7 @@ LINBus : Bus
 // Software: 
 
 DoorSensorSoftware: SoftwareComponent
-    linkToControl : CommunicationUnit
-        [end = PowerWindowControl]
-        [rate = 8]
-    [communication = linkToControl]
-    [target = SmartDoorSensor]
+//    [target = SmartDoorSensor]
 
 PowerWindowControl: SoftwareControl
     [target in ECU]
@@ -91,10 +101,12 @@ PowerWindowControl: SoftwareControl
     [this.ram <= typecastedTarget.ram]
     [ram = 16]
 
-[all b : Bus | (sum b.links.rate) <= b.capacity] // bus capacity constraint
-[all c : SoftwareComponent | all link: c.communication | 
-    (link.end.target = target) || (link.bus && ____)] 
+RequiredSoftwareTopology: SoftwareTopology
 
-// link constraint: all communicating software components are either:
-// 1) located on the same ECU
-// 2) or communicating through a bus
+    flowFromSensorToPWControl : Flow
+        [start = DoorSensorSoftware]
+        [end = PowerWindowControl]
+        [rate = 8]
+
+    [components = DoorSensorSoftware, PowerWindowControl]
+    [flows = flowFromSensorToPWControl]
