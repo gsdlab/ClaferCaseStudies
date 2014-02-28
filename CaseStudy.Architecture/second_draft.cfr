@@ -79,12 +79,16 @@ DoorController : ECUWithRAM
     [ram = 16]
     [cost = 8]
 
+AnotherDoorController : ECUWithRAM
+    [ram = 12]
+    [cost = 6]
+
 SmartDoorSensor : SmartSensor
     [cost = 5]
 
 LINBus : Bus
     [cost = 2]
-    [capacity = 10]
+    [capacity = 16]
 
 // Software: 
 
