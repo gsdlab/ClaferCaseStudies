@@ -23,6 +23,8 @@ abstract HardwareComponent: Component
     [no mappable => no software]
     cost ->> integer // every hardware component has a cost
 
+emptyHardwareSet -> HardwareComponent 0
+
 abstract Bus : HardwareComponent
     [no mappable]
     capacity ->> integer
@@ -30,17 +32,14 @@ abstract Bus : HardwareComponent
         [this.bus = Bus]  // inverse relationship constraint
 
     components -> HardwareComponent* // the components the bus connects
-    [components = flows.start.target ++ flows.end.target]
+    [components = if (#flows > 0) then (flows.start.target ++ flows.end.target) else emptyHardwareSet ]
 
     [(sum flows.rate) <= capacity] // bus capacity constraint
 
 abstract SoftwareTopology: Component
     flows -> Flow*
-        [( !this.bus && (this.start.target = this.end.target)) // located on the same ECU, and there is no bus
-            || 
-         (  this.bus && (this.start.target in this.bus.components) && (this.end.target in this.bus.components))
-          // communicating through a bus
-        ]
+        [( this.bus <=> (this.start.target.ref != this.end.target.ref))] // located on the same ECU, and there is no bus
+        [this.bus => (this.start.target in this.bus.components) && (this.end.target in this.bus.components)]
 
 //=============================================
 // Custom types
@@ -77,7 +76,7 @@ abstract ECUWithRAM : ECU
 // Hardware: 
 
 DoorController : ECUWithRAM
-    [ram = 64]
+    [ram = 16]
     [cost = 8]
 
 SmartDoorSensor : SmartSensor
@@ -96,20 +95,20 @@ RequiredSoftwareTopology: SoftwareTopology
     
     PowerWindowControl: SoftwareControl
         [target in ECU]
-        [ram = 16]
+        [ram = 8]
     
-//    PowerWindowControlCoordinator: SoftwareControl
-//        [target in ECU]
-//        [ram = 16]
+    PowerWindowControlCoordinator: SoftwareControl
+        [target in ECU]
+        [ram = 8]
 
     flowFromSensorToPWControl : Flow
         [start = DoorSensorSoftware]
         [end = PowerWindowControl]
         [rate = 8]
 
-//    flowFromPWControlToPWControlCoordinator : Flow
-//        [start = PowerWindowControl]
-//        [end = PowerWindowControlCoordinator]
-//        [rate = 8]
+    flowFromPWControlToPWControlCoordinator : Flow
+        [start = PowerWindowControl]
+        [end = PowerWindowControlCoordinator]
+        [rate = 8]
 
-    [flows = flowFromSensorToPWControl]
+    [flows = flowFromSensorToPWControl, flowFromPWControlToPWControlCoordinator]
