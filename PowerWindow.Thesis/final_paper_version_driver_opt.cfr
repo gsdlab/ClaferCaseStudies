@@ -1,0 +1,477 @@
+//========================
+/* Distance Data */
+//========================
+
+Dist
+  switchToMotor : integer = 40
+  switchToDoorModule : integer = 20
+  motorToDoorModule : integer = 30
+  inlineToSwitch : integer = 45
+  inlineToMotor : integer = 45
+  inlineToDoorModule : integer = 35
+
+  doorSpliceToSwitch : integer = 25
+  doorSpliceToMotor : integer = 25
+  doorSpliceToDoorModule : integer = 15
+
+  inlineDtoInlineFP : integer = 170 
+  inlineDtoBCM : integer = 40  
+  inlineFPtoBCM : integer = 130  
+
+  /* for power supply */
+  inlineDtoPowerFuse : integer = 40  
+  inlineFPtoPowerFuse : integer = 130  
+
+abstract PWSubsystemConfig
+  basicUpDown  // mandatory feature
+  express ?    // at least express down
+    expressUp ?  // both express up and express down
+  otherRemoteControl ?
+
+abstract Device
+  electronic ?
+  smart ?
+  [smart => electronic]
+  deployedFrom -> AnalysisFunction *
+    [this.deployedTo = parent]
+
+abstract AnalysisFunction
+  deployedTo -> Device
+    [parent in this.deployedFrom]
+
+abstract FunctionalDevice : AnalysisFunction
+
+abstract AFConnector
+  src -> AnalysisFunction
+  dest -> AnalysisFunction
+
+abstract ECU : Device
+  [smart]
+
+abstract PWSubsystemFunctionalArchitecture
+  WinController : AnalysisFunction
+  Motor : FunctionalDevice
+  Switch : FunctionalDevice
+  CurrentSensor : FunctionalDevice
+
+  PositionSensor : FunctionalDevice ?
+  PinchDetection : AnalysisFunction?
+
+  OtherRemoteArbitrator : AnalysisFunction ?
+
+  conCommand : AFConnector
+    [src = WinController]
+    [dest = Motor]
+
+  conCurrent : AFConnector
+    [src = CurrentSensor]
+    [dest = WinController]
+
+  conArbitratedRequestFromOtherRemoteArbitratorToWinController : AFConnector ?
+    [src = OtherRemoteArbitrator]
+    [dest = WinController]
+  conRequestFromMainSwitchToOtherRemoteArbitrator : AFConnector ?
+    [src = Switch]
+    [dest = OtherRemoteArbitrator]
+  conRequestFromMainSwitchToWinController : AFConnector ?
+    [src = Switch]
+    [dest = WinController]
+
+  pinchDetectionConnections ?
+    conPositionToWinController : AFConnector
+      [src = PositionSensor]
+      [dest = WinController]
+    conPositionToPinchDetection : AFConnector
+      [src = PositionSensor]
+      [dest = PinchDetection]
+    conCurrentToPinchDetection : AFConnector
+      [src = CurrentSensor]
+      [dest = PinchDetection]
+    conPinchDetectionToWinController : AFConnector
+      [src = PinchDetection]
+      [dest = WinController]
+
+  config -> PWSubsystemConfig
+
+  [config.otherRemoteControl <=> OtherRemoteArbitrator]
+  [config.otherRemoteControl <=> 
+      conRequestFromMainSwitchToOtherRemoteArbitrator]
+  [config.otherRemoteControl <=> 
+      conArbitratedRequestFromOtherRemoteArbitratorToWinController]
+
+  [no config.otherRemoteControl <=> conRequestFromMainSwitchToWinController]
+
+  [config.express.expressUp <=> PinchDetection]
+  [config.express.expressUp <=> PositionSensor]
+  [config.express.expressUp <=> pinchDetectionConnections]
+
+abstract PWSubsystemHardware
+
+  doorModule : ECU ?
+  switch -> Device
+  motor -> Device
+  bcm -> ECU ?
+
+  localComponents -> Device 0..4
+  [localComponents = switch.ref, motor, bcm.ref, doorModule]
+  localSmartComponents -> Device 0..4
+  [localSmartComponents =  smartSwitch, smartMotor, bcm.ref, doorModule]
+
+  smartSwitch : Device ?
+    [smart]
+    [switch = this]
+  dumbSwitch : Device ?
+    [no smart]
+    [switch = this]
+  [smartSwitch xor dumbSwitch]
+
+  smartMotor : Device ?
+    [smart]
+    [motor = this]
+  dumbMotor : Device ?
+    [no smart]
+    [motor = this]
+  [smartMotor xor dumbMotor]
+
+  powerFuse : Device ?
+    [no electronic]
+    [no smart] 
+
+  /* Bus */
+  [busType <=> (#localSmartComponents > 1)]
+  [no busType => (busLength = 0)]
+  busLength ->> integer
+  busMass ->> integer
+  [busMass = busLength]
+  xor busType ?
+    branchToDoorModule
+      [bcm && doorModule]
+
+      [(smartSwitch && smartMotor) => 
+        (busLength = dist.inlineToBCM + Dist.inlineToDoorModule 
+            + Dist.motorToDoorModule + Dist.switchToDoorModule)]
+
+      [(smartSwitch && !smartMotor) => 
+        (busLength = dist.inlineToBCM + Dist.inlineToDoorModule 
+            + Dist.switchToDoorModule) ]
+
+      [(!smartSwitch && smartMotor) => 
+        (busLength = dist.inlineToBCM + Dist.inlineToDoorModule 
+            + Dist.motorToDoorModule) ]
+
+      [(!smartSwitch && !smartMotor) => 
+        (busLength = dist.inlineToBCM + Dist.inlineToDoorModule) ]
+
+    branchToSwitch
+      [bcm && smartSwitch && !doorModule]
+
+      [(smartMotor) => 
+        (busLength = dist.inlineToBCM + Dist.inlineToSwitch 
+           + Dist.switchToMotor)]
+
+      [(!smartMotor) => 
+        (busLength = dist.inlineToBCM + Dist.inlineToSwitch) ]
+
+    branchToAllSmartComponents
+      [bcm]
+      [(no smartSwitch && no smartMotor && doorModule) => 
+        busLength = dist.inlineToBCM + Dist.inlineToDoorModule]
+
+      [(no smartSwitch && smartMotor && no doorModule) => 
+        busLength = dist.inlineToBCM + Dist.inlineToMotor]
+      [(no smartSwitch && smartMotor && doorModule) => 
+        busLength = dist.inlineToBCM + Dist.inlineToMotor 
+        + Dist.doorSpliceToDoorModule]
+
+      [(smartSwitch && no smartMotor && no doorModule) => 
+        busLength = dist.inlineToBCM + Dist.inlineToSwitch]
+      [(smartSwitch && no smartMotor && doorModule) => 
+        busLength = dist.inlineToBCM + Dist.inlineToSwitch]
+
+      [(smartSwitch && smartMotor && no doorModule) => 
+        busLength = dist.inlineToBCM + Dist.inlineToSwitch
+         + Dist.doorSpliceToMotor]
+      [(smartSwitch && smartMotor && doorModule) => 
+        busLength = dist.inlineToBCM + Dist.inlineToSwitch
+         + Dist.doorSpliceToMotor]
+
+    localBusOnly
+      [no bcm]
+      [(smartSwitch && smartMotor) => 
+        busLength = Dist.switchToMotor]
+      [(doorModule && smartSwitch && !smartMotor) => 
+        busLength = Dist.switchToDoorModule]
+      [(doorModule && smartMotor && !smartSwitch) => 
+        busLength = Dist.motorToDoorModule]
+
+  dist
+    inlineToBCM ->> integer = Dist.inlineDtoBCM
+    inlineToFuse ->> integer = Dist.inlineDtoPowerFuse
+
+abstract PWSubsystemDeploymentAndWiring
+  ht -> PWSubsystemHardware
+  fa -> PWSubsystemFunctionalArchitecture
+
+  [fa.Switch.deployedTo.ref = ht.switch.ref] // to the local switch only
+  [fa.Motor.deployedTo.ref  = ht.motor.ref ] // to the motor device only
+
+  // Motor Driver
+  motorDriver -> Device
+  [motorDriver.ref in ht.localComponents.ref] 
+  // MotorDriver can be any of {BCM, switch, motor, doorModule}
+
+  [(ht.doorModule && ht.bcm) => (motorDriver.ref != ht.bcm.ref)]
+  // if we have a door module and BCM, then the motor driver is not BCM
+  // ExpressUp: Position Sensor, Pinch Detection, WinCotnroller
+
+  [fa.config.express.expressUp =>
+    (
+      (fa.PositionSensor.deployedTo.ref in ht.localComponents.ref) &&
+      (fa.PinchDetection.deployedTo.ref in ht.localSmartComponents.ref) &&
+      (fa.WinController.deployedTo.ref in ht.localSmartComponents.ref) &&
+      ((fa.PositionSensor.deployedTo.ref != motorDriver.ref)
+          => (fa.PositionSensor.deployedTo.ref = ht.motor.ref))
+    )
+  ]
+
+  [fa.config.express => (fa.WinController.deployedTo.electronic)]
+
+  [motorDriver.smart => (
+      (fa.WinController.deployedTo.ref in ht.localSmartComponents.ref) &&
+      (fa.CurrentSensor.deployedTo.ref = motorDriver.ref)
+    )
+  ]
+  [!motorDriver.electronic => (
+  // if the motor is driven by a dumb component (not even electronic)
+    (
+      (fa.WinController.deployedTo.ref = ht.motor.ref) && 
+      (fa.CurrentSensor.deployedTo.ref = ht.motor.ref)
+      // both WinController and CurrentSensor are on the motor (thermistor)
+    )
+    || // or
+    (
+      (fa.WinController.deployedTo.ref = ht.switch.ref) && 
+      (fa.CurrentSensor.deployedTo.ref = ht.switch.ref)
+      // both window controller and the current sensor are on the dumb switch
+    )
+  )]
+
+  [(motorDriver.electronic && !motorDriver.smart) =>
+    (fa.CurrentSensor.deployedTo.ref = motorDriver.ref) &&
+    (fa.WinController.deployedTo.ref in ht.localComponents.ref)
+  ]
+
+  [fa.OtherRemoteArbitrator => 
+    (fa.WinController.deployedTo.ref != ht.motor.ref => 
+        (fa.OtherRemoteArbitrator.deployedTo.ref 
+               = fa.WinController.deployedTo.ref)
+    )
+    &&
+    (fa.OtherRemoteArbitrator.deployedTo.ref in ht.localSmartComponents.ref)
+  ] 
+
+  distFromMotorToMotorDriver ->> integer
+  [(motorDriver.ref = ht.switch.ref) => 
+    (distFromMotorToMotorDriver = Dist.switchToMotor)]
+  [(motorDriver.ref = ht.motor.ref) => 
+    (distFromMotorToMotorDriver = 0)]
+  [(motorDriver.ref = ht.doorModule) => 
+    (distFromMotorToMotorDriver = Dist.motorToDoorModule)]
+  [(motorDriver.ref = ht.bcm.ref) => 
+    (distFromMotorToMotorDriver = Dist.inlineToMotor + ht.dist.inlineToBCM)]
+
+  /* Command Wire */
+  wireCommand : PowerWireConnector ?
+    [src = motorDriver.ref]
+    [dest = ht.motor.ref]
+    [length = distFromMotorToMotorDriver]
+
+  [(motorDriver.ref = ht.motor.ref) <=> ht.motor.smart]
+  // if the driver is not the motor, then we need a power wire for the command
+  // we are not making discrete connection to the motor
+  [ht.motor.smart <=> no wireCommand]
+
+  /* Position Wire */
+
+  wirePosition : AnalogWireConnector ?
+    [src = ht.motor.ref]
+    [dest = motorDriver.ref]
+    [length = 2 * distFromMotorToMotorDriver]
+
+  [wirePosition <=> (fa.config.express.expressUp 
+    && (motorDriver.ref != ht.motor.ref) )]
+  // the wire is present if and only if we have express-up,
+  // and the motor driver is not on the motor
+  [(fa.config.express.expressUp && motorDriver.ref = ht.switch.ref) => 
+    ht.switch.smart]
+
+  /* No Other Remote Control */
+
+  [!fa.config.otherRemoteControl => 
+    ((fa.WinController.deployedTo.ref = ht.switch.ref) 
+    => no wireRequestDirect ) &&
+    ((fa.WinController.deployedTo.ref != ht.switch.ref ) =>
+      (
+        ((ht.switch.ref != motorDriver.ref && !ht.switch.smart) 
+             => wireRequestDirect ) &&
+        ((ht.switch.ref = motorDriver.ref) => no wireRequestDirect )
+      ))
+  ]
+
+  numberOfDiscreteWiresFromSwitch ->> integer
+  [numberOfDiscreteWiresFromSwitch = if fa.config.express then 3 else 2]
+
+  wireRequestDirect : DiscreteWireConnector ?
+    [src = ht.switch.ref]
+    [dest.ref in ht.localSmartComponents.ref]
+    [!fa.config.otherRemoteControl]
+
+    [(dest.ref = ht.motor.ref) => 
+      (length = numberOfDiscreteWiresFromSwitch * Dist.switchToMotor)]
+    [(dest.ref = ht.doorModule) => 
+      (length = numberOfDiscreteWiresFromSwitch * Dist.switchToDoorModule)]
+    [(dest.ref = ht.bcm.ref) => 
+      (length = numberOfDiscreteWiresFromSwitch * (Dist.inlineToSwitch 
+                                              + ht.dist.inlineToBCM))]
+  /* Other Remote Control */
+
+  [fa.config.otherRemoteControl => (
+      (!ht.switch.smart) <=> wireRequestIndirect)
+  ]
+
+  wireRequestIndirect : DiscreteWireConnector ?
+    [src.ref = ht.switch.ref]
+    [dest.ref in ht.localSmartComponents.ref]
+    // from switch to any other local smart component 
+    //{BCM, smartMotor, doorModule}
+    [fa.config.otherRemoteControl]
+
+    [(dest.ref = ht.motor.ref) => 
+      (length = numberOfDiscreteWiresFromSwitch * Dist.switchToMotor)]
+    [(dest.ref = ht.doorModule) => 
+      (length = numberOfDiscreteWiresFromSwitch * Dist.switchToDoorModule)]
+    [(dest.ref = ht.bcm.ref) => 
+      (length = numberOfDiscreteWiresFromSwitch * (Dist.inlineToSwitch 
+                                              + ht.dist.inlineToBCM))]
+
+  //////////////////////////////
+  // switch or motor being electronic
+  //////////////////////////////
+
+  [(!ht.switch.smart) => 
+    // if the switch is not smart
+    (ht.switch.electronic <=> (fa.config.express 
+        && fa.WinController.deployedTo.ref = ht.switch.ref))
+    // it's electronic iff WnController is located to it, and we have express
+  ]
+
+  [(!ht.motor.smart) => 
+    // if the motor is not smart
+    (ht.motor.electronic <=> (
+        // it's electronic iff WnController is located to it, and we have express
+        // or we use hall sensor as a position sensor (it's placed on the motor)
+        (fa.config.express && (fa.WinController.deployedTo.ref = ht.motor.ref)) 
+        || (fa.config.express.expressUp && 
+             (fa.PositionSensor.deployedTo.ref = ht.motor.ref))
+      )
+    )
+  ]
+
+//////////// Load Power Supply /////////////////////////
+  // from the load power fuse, to the motor driver 
+
+  wireFromLoadPowerFuseToMotorDriver : PowerWireConnector
+    [src.ref = ht.powerFuse]
+    [dest.ref = motorDriver.ref]
+    [(motorDriver.ref = ht.switch.ref) => 
+       (length = ht.dist.inlineToFuse + Dist.inlineToSwitch)]
+    // the door module is the switch        
+    [(motorDriver.ref = ht.motor.ref) => 
+      (length = ht.dist.inlineToFuse + Dist.inlineToMotor)]
+    // the motor driver is the motor itself        
+    [(motorDriver.ref = ht.doorModule) => 
+      (length = ht.dist.inlineToFuse + Dist.inlineToDoorModule)]
+    // the door module is the motor driver
+    [(motorDriver.ref = ht.bcm) => (length = 0)] 
+    // BCM has it's own power supply very close to that
+
+//////////// Device Power Supply ///////////////////////////////
+  // from the device power fuse, to any electronic component 
+
+  [ht.switch.electronic <=> wireFromDevicePowerFuseToSwitch]
+  wireFromDevicePowerFuseToSwitch: DevicePowerWireConnector ?
+    [src.ref = ht.powerFuse]
+    [dest.ref = ht.switch.ref]
+    [length = ht.dist.inlineToFuse + Dist.inlineToSwitch]
+
+  [ht.motor.electronic <=> wireFromDevicePowerFuseToMotor]
+  wireFromDevicePowerFuseToMotor: DevicePowerWireConnector ?
+    [src.ref = ht.powerFuse]
+    [dest.ref = ht.motor.ref]
+    [length = ht.dist.inlineToFuse + Dist.inlineToMotor]
+
+  [ht.doorModule <=> wireFromDevicePowerFuseToDoorModule]
+  wireFromDevicePowerFuseToDoorModule: DevicePowerWireConnector ?
+    [src.ref = ht.powerFuse]
+    [dest.ref = ht.doorModule]
+    [length = ht.dist.inlineToFuse + Dist.inlineToDoorModule]
+
+abstract WireConnector
+  src -> Device
+  dest -> Device
+  [src.ref != dest.ref]
+  length ->> integer                        // wire length
+  thickness ->> integer                     // wire thickness
+  mass ->> integer = length * thickness     // wire mass (thickness * length)
+
+abstract DiscreteWireConnector : WireConnector// inherits WireConnector
+  [thickness = 1]       // take as a base thickness
+
+abstract AnalogWireConnector : WireConnector// inherits WireConnector
+  [thickness = 1]       // take as a base thickness
+
+abstract PowerWireConnector : WireConnector  // inherits WireConnector
+  [thickness = 7]       // power wire is ~7 times thicker than the discrete one
+
+abstract DevicePowerWireConnector : WireConnector  // inherits WireConnector
+  [thickness = 1]       // devie power wire has the same thickness
+
+abstract PowerWindowSystem
+  BCM : ECU ?
+  driverFAConfig : PWSubsystemConfig
+  driverFA : PWSubsystemFunctionalArchitecture
+    [config = driverFAConfig]
+  driverHardware: PWSubsystemHardware
+    [bcm = BCM]
+  driverDeploymentAndWiring : PWSubsystemDeploymentAndWiring
+    [ht = driverHardware]
+    [fa = driverFA]
+
+  quality
+    numberOfSmartComponents ->> integer = #driverHardware.localSmartComponents
+    wireLength ->> integer = sum WireConnector.length + driverHardware.busLength
+    wireMass ->> integer = sum WireConnector.mass + driverHardware.busMass
+
+system : PowerWindowSystem
+<<min system.quality.numberOfSmartComponents >>
+<<min system.quality.wireLength >>
+<<min system.quality.wireMass >>
+
+/*
+PureElectric : PowerWindowSystem
+  [driverHardware.dumbSwitch]
+  [driverHardware.dumbMotor]
+  [no driverHardware.doorModule]
+  [no BCM]
+  [no driverFAConfig.express]
+  [no driverFAConfig.otherRemoteControl]
+
+SmartSwitchAndMotorAndBCM : PowerWindowSystem
+  [driverFAConfig.express.expressUp]
+  [driverFAConfig.otherRemoteControl]
+  [driverHardware.smartMotor]
+  [driverHardware.smartSwitch]
+  [no driverHardware.doorModule]
+
+  [BCM]
+*/
