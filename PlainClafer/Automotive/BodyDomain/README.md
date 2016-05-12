@@ -17,7 +17,7 @@ Contributers
 
 Generating Instances
 --------------------
-1. Build the .cfr file using ``clafer -m choco <model file name>.cfr''
+1. Build the .cfr file using ``clafer -m choco <model file name>.cfr``
 2. Generate instances:
   * All non-optimal instances: ``java -Xmx3g -jar <path to chocosolver jar> --file=<model file name> --maxint=<max int size> --output=<instance output file>``
     * Note: The java heap needs around 3GB due to the large max integer size.
