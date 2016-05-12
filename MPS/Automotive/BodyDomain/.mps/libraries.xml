@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectLibraryManager">
+    <option name="libraries">
+      <map>
+        <entry key="org.clafer.mps">
+          <value>
+            <Library>
+              <option name="name" value="org.clafer.mps" />
+              <option name="path" value="$USER_HOME$/Documents/Clafer_MPS/claferMPS/code/languages/org.clafer.mps" />
+            </Library>
+          </value>
+        </entry>
+        <entry key="org.mbeddr">
+          <value>
+            <Library>
+              <option name="name" value="org.mbeddr" />
+              <option name="path" value="${mbeddr.github.core.home}/code/languages" />
+            </Library>
+          </value>
+        </entry>
+        <entry key="org.mbeddr.plugins">
+          <value>
+            <Library>
+              <option name="name" value="org.mbeddr.plugins" />
+              <option name="path" value="${mbeddr.github.core.home}/code/plugins" />
+            </Library>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

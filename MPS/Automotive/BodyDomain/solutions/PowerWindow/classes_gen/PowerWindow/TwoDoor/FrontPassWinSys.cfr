@@ -1,0 +1,319 @@
+/*************** Reference_Model ***************/ 
+
+abstract System 
+abstract FeatureModel 
+abstract Architecture 
+abstract FunctionalAnalysis 
+abstract HardwareArchitecture 
+abstract DeviceNodeClassification 
+abstract CommTopology 
+abstract PowerTopology 
+abstract Deployment 
+
+abstract Feature 
+
+abstract FunctionalAnalysisComponent 
+  deployedTo -> DeviceNode 
+  xor implementation 
+    hardware 
+      [deployedTo.type in (EEDeviceNode , SmartDeviceNode)]
+    software 
+      [deployedTo.type in SmartDeviceNode]
+
+
+abstract AnalysisFunction : FunctionalAnalysisComponent 
+  [deployedTo.type in SmartDeviceNode]
+
+abstract FunctionalDevice : FunctionalAnalysisComponent 
+  [deployedTo.type in (SmartDeviceNode , EEDeviceNode)]
+
+abstract FunctionConnector 
+  sender -> FunctionalAnalysisComponent 
+  receiver -> FunctionalAnalysisComponent 
+  deployedTo -> HardwareDataConnector ? 
+    [this.parent in this.deployedFrom]
+    [(sender.deployedTo.dref , receiver.deployedTo.dref) in (deployedTo.endpoint.dref)]
+  [(sender.deployedTo.dref = receiver.deployedTo.dref) <=> no(this.deployedTo)]
+
+
+enum DeviceNodeType = SmartDeviceNode | EEDeviceNode | PowerDeviceNode
+abstract DeviceNode 
+  type -> DeviceNodeType 
+
+abstract HardwareConnector 
+
+abstract PowerConnector : HardwareConnector 
+  source -> DeviceNode 
+  sink -> DeviceNode 
+
+abstract LoadPowerConnector : PowerConnector 
+abstract DevicePowerConnector : PowerConnector 
+
+abstract HardwareDataConnector : HardwareConnector 
+  endpoint -> DeviceNode 2..* 
+  deployedFrom -> FunctionConnector 1..* 
+    [this.deployedTo = this.parent]
+
+abstract DiscreteDataConnector : HardwareDataConnector 
+abstract AnalogDataConnector : HardwareDataConnector 
+
+abstract BusConnector : HardwareDataConnector 
+  [all e : endpoint | e.type = SmartDeviceNode]
+  xor type 
+    LowSpeedCAN 
+    HighSpeedCAN 
+    LIN 
+    FlexRay 
+
+abstract LogicalBusBridge : HardwareDataConnector 
+  bus -> BusConnector 2..2 
+  [all e : this.endpoint | e.type = SmartDeviceNode]
+
+// Automotive Concepts [TODO] 
+abstract ECU : DeviceNode 
+abstract Switch : DeviceNode 
+abstract Motor : DeviceNode 
+abstract Inline : DeviceNode 
+  abstract Pin : DeviceNode 
+// End Automotive Concepts 
+
+/*************** End Reference_Model ***************/ 
+
+/*************** FrontPassWinSys ***************/ 
+
+FrontPassWinSys : System 
+  FPWinSysFM : WinSysFM 
+    [this.expressDown.expressUp => DriverWinSys.DWinSysFM.expressDown.expressUp]
+    [this.expressDown => DriverWinSys.DWinSysFM.expressDown]
+  FPWinSysArch : Architecture 
+    FPWinSysFAA : WinSysFAA 
+      DriverWinSwitch : FunctionalDevice 
+        [this.implementation.hardware]
+      dWinReq : FunctionConnector 
+        [this.sender = DriverWinSwitch && this.receiver = WinArbiter]
+      [FPWinSysFAA.PinchDetectionFA <=> FrontPassWinSys.FPWinSysFM.expressDown.expressUp]
+    FPWinSysHA : WinSysHA 
+      [dn = FPWinSysDN]
+      [pt = FPWinSysPT]
+      [ct = FPWinSysCT]
+      FPWinSysDN : WinSysDN 
+        DriverSwitch -> DriverWinSys.DWinSysArch.DWinSysHA.DWinSysDN.Switch 
+      FPWinSysCT : WinSysCT 
+        [dn = FPWinSysDN]
+        driverSwitchPassSwichDisc : DiscreteDataConnector ? 
+          [this.endpoint = (FPWinSysDN.DriverSwitch.dref , FPWinSysDN.Switch)]
+        driverSwitchPassMotorDisc : DiscreteDataConnector ? 
+          [this.endpoint = (FPWinSysDN.DriverSwitch.dref , FPWinSysDN.Motor)]
+        driverSwitchPassDoorModuleDisc : DiscreteDataConnector ? 
+          [this.endpoint = (FPWinSysDN.DriverSwitch.dref , FPWinSysDN.DoorModule)]
+        driverSwitchPassBCM : DiscreteDataConnector ? 
+          [this.endpoint = (FPWinSysDN.DriverSwitch.dref , FPWinSysDN.BCM.dref)]
+        driverPassDoorBusBridge : LogicalBusBridge ? 
+          [this.bus = (DriverWinSys.DWinSysArch.DWinSysHA.DWinSysCT.localLowSpeedBus , FPWinSysCT.localLowSpeedBus)]
+
+      FPWinSysPT : WinSysPT 
+        [dn = FPWinSysDN]
+    FPWinSysDpl : WinSysDpl 
+      [fa = FPWinSysFAA]
+      [ha = FPWinSysHA]
+      [FPWinSysFAA.DriverWinSwitch.deployedTo.dref in (FPWinSysDN.DriverSwitch.dref)]
+
+/*************** End FrontPassWinSys ***************/ 
+
+/*************** WinSysFM ***************/ 
+
+abstract WinSysFM : FeatureModel 
+  basic : Feature 
+  expressDown : Feature ? 
+    expressUp : Feature ? 
+
+/*************** End WinSysFM ***************/ 
+
+/*************** WinSysDpl ***************/ 
+
+abstract WinSysDpl : Deployment 
+  fa -> WinSysFAA 
+  ha -> WinSysHA 
+
+  [this.fa.WinSwitch.deployedTo.dref in (this.ha.dn.Switch)]
+  [this.fa.WinArbiter.deployedTo.dref in (this.ha.dn.Switch , this.ha.dn.Motor , this.ha.dn.BCM.dref , this.ha.dn.DoorModule)]
+  [this.fa.WinControl.deployedTo.dref in (this.ha.dn.Switch , this.ha.dn.Motor , this.ha.dn.BCM.dref , this.ha.dn.DoorModule)]
+  [this.fa.CurrentSensor.deployedTo.dref in (this.ha.dn.Motor)]
+
+  PinchDetectionDpl : Deployment ? 
+    [WinSysDpl.fa.PinchDetectionFA.PinchDetection.deployedTo.dref in (WinSysDpl.ha.dn.Switch , WinSysDpl.ha.dn.Motor , WinSysDpl.ha.dn.BCM.dref , WinSysDpl.ha.dn.DoorModule)]
+    [WinSysDpl.fa.PinchDetectionFA.PositionSensor.deployedTo.dref in (WinSysDpl.ha.dn.Motor)]
+  [PinchDetectionDpl <=> WinSysFM.expressDown.expressUp]
+
+  // Now the set of constraints to configure the LP topology based on WinControl deployment 
+  [(this.fa.WinControl.deployedTo.dref = this.ha.dn.Switch) <=> this.ha.pt.LoadPowerPT.SwitchIsDriver]
+  [(this.fa.WinControl.deployedTo.dref = this.ha.dn.Motor) <=> this.ha.pt.LoadPowerPT.MotorIsDriver]
+  [(this.fa.WinControl.deployedTo.dref = this.ha.dn.DoorModule) <=> this.ha.pt.LoadPowerPT.DoorModuleIsDriver]
+  [(this.fa.WinControl.deployedTo.dref = this.ha.dn.BCM.dref) <=> this.ha.pt.LoadPowerPT.BCMIsDriver]
+
+
+
+
+/*************** End WinSysDpl ***************/ 
+
+/*************** WinSysHA ***************/ 
+
+abstract WinSysHA : HardwareArchitecture 
+  ct -> WinSysCT 
+  dn -> WinSysDN 
+  pt -> WinSysPT 
+
+/*************** End WinSysHA ***************/ 
+
+/*************** WinSysFAA ***************/ 
+
+abstract WinSysFAA : FunctionalAnalysis 
+  WinSwitch : FunctionalDevice 
+    [this.implementation.hardware]
+  WinArbiter : AnalysisFunction 
+    [this.implementation.software || this.implementation.hardware]
+  WinControl : AnalysisFunction 
+    [this.implementation.software]
+  WinMotor : FunctionalDevice 
+    [this.implementation.hardware]
+  CurrentSensor : FunctionalDevice 
+    [this.implementation.hardware]
+  localWinReq : FunctionConnector 
+    [this.sender = WinSwitch && this.receiver = WinArbiter]
+  winReq : FunctionConnector 
+    [this.sender = WinArbiter && this.receiver = WinControl]
+  winCmd : FunctionConnector 
+    [this.sender = WinControl && this.receiver = WinMotor]
+  current : FunctionConnector 
+    [this.sender = CurrentSensor && this.receiver = WinControl]
+
+  PinchDetectionFA : FunctionalAnalysis ? 
+    PinchDetection : AnalysisFunction 
+      [this.implementation.software]
+    PositionSensor : FunctionalDevice 
+      [this.implementation.hardware]
+    position : FunctionConnector 
+      [this.sender = PositionSensor && this.receiver = PinchDetection]
+    object : FunctionConnector 
+      [this.sender = PinchDetection && this.receiver = WinControl]
+
+/*************** End WinSysFAA ***************/ 
+
+/*************** Car ***************/ 
+
+Car : System 
+  CarArchitecture : Architecture 
+    CarHA : HardwareArchitecture 
+      CarDN : DeviceNodeClassification 
+        BCM : DeviceNode ? 
+          [this.type in (SmartDeviceNode)]
+        ElectricCenter : DeviceNode 
+          [this.type in (PowerDeviceNode)]
+
+/*************** End Car ***************/ 
+
+/*************** WinSysCT ***************/ 
+
+abstract WinSysCT : CommTopology 
+  dn -> WinSysDN 
+  switchMotorDisc : DiscreteDataConnector ? 
+    [this.endpoint = (WinSysCT.dn.Switch , WinSysCT.dn.Motor)]
+  switchBCMDisc : DiscreteDataConnector ? 
+    [this.endpoint = (WinSysCT.dn.Switch , WinSysCT.dn.BCM.dref)]
+  switchDoorModuleDisc : DiscreteDataConnector ? 
+    [this.endpoint = (WinSysCT.dn.Switch , WinSysCT.dn.DoorModule)]
+  motorBCMDisc : DiscreteDataConnector ? 
+    [this.endpoint = (WinSysCT.dn.Motor , WinSysCT.dn.BCM.dref)]
+  motorDoorModuleDisc : DiscreteDataConnector ? 
+    [this.endpoint = (WinSysCT.dn.Motor , WinSysCT.dn.DoorModule)]
+  localLowSpeedBus : BusConnector ? 
+    [this.endpoint in (WinSysCT.dn.BCM.dref , WinSysCT.dn.DoorModule , WinSysCT.dn.Switch , WinSysCT.dn.Motor)]
+    [this.type.LIN || this.type.LowSpeedCAN]
+
+/*************** End WinSysCT ***************/ 
+
+/*************** DriverWinSys ***************/ 
+
+DriverWinSys : System 
+  DWinSysFM : WinSysFM 
+  DWinSysArch : Architecture 
+    DWinSysFA : WinSysFAA 
+      [DWinSysFA.PinchDetectionFA <=> DriverWinSys.DWinSysFM.expressDown.expressUp]
+    DWinSysHA : WinSysHA 
+      [dn = DWinSysDN]
+      [pt = DWinSysPT]
+      [ct = DWinSysCT]
+      DWinSysDN : WinSysDN 
+      DWinSysPT : WinSysPT 
+        [dn = DWinSysDN]
+      DWinSysCT : WinSysCT 
+        [dn = DWinSysDN]
+    DWinSysDpl : WinSysDpl 
+      [fa = DWinSysFA]
+      [ha = DWinSysHA]
+
+
+
+/*************** End DriverWinSys ***************/ 
+
+/*************** WinSysDN ***************/ 
+
+abstract WinSysDN : DeviceNodeClassification 
+  Switch : DeviceNode 
+    [this.type in (SmartDeviceNode , EEDeviceNode)]
+  Motor : DeviceNode 
+    [this.type in (SmartDeviceNode , EEDeviceNode)]
+  DoorInline : DeviceNode 
+    [this.type in (PowerDeviceNode)]
+  DoorModule : DeviceNode ? 
+    [this.type in (SmartDeviceNode)]
+  BCM -> Car.CarArchitecture.CarHA.CarDN.BCM ? 
+  EC -> Car.CarArchitecture.CarHA.CarDN.ElectricCenter 
+
+/*************** End WinSysDN ***************/ 
+
+/*************** WinSysPT ***************/ 
+
+abstract WinSysPT : PowerTopology 
+  dn -> WinSysDN 
+  motorInlineDP : DevicePowerConnector ? 
+    [this.source = WinSysPT.dn.DoorInline && this.sink = WinSysPT.dn.Motor]
+  switchInlineDP : DevicePowerConnector ? 
+    [this.source = WinSysPT.dn.DoorInline && this.sink = WinSysPT.dn.Switch]
+  doorModuleInlineDP : DevicePowerConnector ? 
+    [this.source = WinSysPT.dn.DoorInline && this.sink = WinSysPT.dn.DoorModule]
+  inlineECDP : DevicePowerConnector ? 
+    [this.source = WinSysPT.dn.EC.dref && this.sink = WinSysPT.dn.DoorInline]
+  [motorInlineDP <=> WinSysPT.dn.Motor.type in SmartDeviceNode]
+  [switchInlineDP <=> WinSysPT.dn.Switch.type in SmartDeviceNode]
+  [doorModuleInlineDP <=> some(WinSysPT.dn.DoorModule)]
+  [inlineECDP <=> some(motorInlineDP , switchInlineDP , doorModuleInlineDP)]
+  xor LoadPowerPT : PowerTopology 
+    MotorIsDriver : PowerTopology 
+      motorLP : LoadPowerConnector 
+        [this.source = WinSysPT.dn.DoorInline && this.sink = WinSysPT.dn.Motor]
+      inlineLP : LoadPowerConnector 
+        [this.source = WinSysPT.dn.EC.dref && this.sink = WinSysPT.dn.DoorInline]
+    SwitchIsDriver : PowerTopology 
+      motorLP : LoadPowerConnector 
+        [this.source = WinSysPT.dn.Switch && this.sink = WinSysPT.dn.Motor]
+      switchLP : LoadPowerConnector 
+        [this.source = WinSysPT.dn.DoorInline && this.sink = WinSysPT.dn.Switch]
+      inlineLP : LoadPowerConnector 
+        [this.source = WinSysPT.dn.EC.dref && this.sink = WinSysPT.dn.DoorInline]
+    DoorModuleIsDriver : PowerTopology 
+      motorLP : LoadPowerConnector 
+        [this.source = WinSysPT.dn.DoorModule && this.sink = WinSysPT.dn.Motor]
+      doorModuleLP : LoadPowerConnector 
+        [this.source = WinSysPT.dn.DoorInline && this.sink = WinSysPT.dn.DoorModule]
+      inlineLP : LoadPowerConnector 
+        [this.source = WinSysPT.dn.EC.dref && this.sink = WinSysPT.dn.DoorInline]
+    BCMIsDriver : PowerTopology 
+
+      motorLP : LoadPowerConnector 
+        [this.source = WinSysPT.dn.DoorInline && this.sink = WinSysPT.dn.Motor]
+      inlineLP : LoadPowerConnector 
+        [this.source = WinSysPT.dn.BCM.dref && this.sink = WinSysPT.dn.DoorInline]
+
+/*************** End WinSysPT ***************/ 
+

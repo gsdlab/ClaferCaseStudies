@@ -1,0 +1,143 @@
+/*************** Reference_Model ***************/ 
+
+abstract System 
+  cost -> integer 
+  mass -> integer 
+  warrantyCost -> integer 
+abstract FeatureModel 
+abstract Architecture 
+abstract FunctionalAnalysis 
+abstract HardwareArchitecture 
+  totalMass -> integer 
+  totalCost -> integer 
+  totalWarrantyCost -> integer 
+abstract DeviceNodeClassification 
+  totalCost -> integer 
+  totalMass -> integer 
+  totalWarrantyCost -> integer 
+abstract CommTopology 
+  totalMass -> integer 
+  totalCost -> integer 
+abstract PowerTopology 
+  totalMass -> integer 
+  totalCost -> integer 
+abstract Deployment 
+
+abstract Feature 
+
+abstract FunctionalAnalysisComponent 
+  deployedTo -> DeviceNode 
+  xor implementation 
+    hardware 
+      [deployedTo.type in (EEDeviceNode , SmartDeviceNode)]
+    software 
+      [deployedTo.type in SmartDeviceNode]
+
+
+abstract AnalysisFunction : FunctionalAnalysisComponent 
+  [deployedTo.type in SmartDeviceNode]
+  latency -> integer 
+  baseLatency -> integer 
+
+abstract FunctionalDevice : FunctionalAnalysisComponent 
+  [deployedTo.type in (SmartDeviceNode , EEDeviceNode)]
+  latency -> integer 
+
+abstract FunctionConnector 
+  sender -> FunctionalAnalysisComponent 
+  receiver -> FunctionalAnalysisComponent 
+  deployedTo -> HardwareDataConnector ? 
+    [this.parent in this.deployedFrom]
+    [(sender.deployedTo.dref , receiver.deployedTo.dref) in (deployedTo.endpoint.dref)]
+  [(sender.deployedTo.dref = receiver.deployedTo.dref) <=> no(this.deployedTo)]
+
+
+  messageSize -> integer 
+  latency -> integer 
+enum DeviceNodeType = SmartDeviceNode | EEDeviceNode | PowerDeviceNode
+abstract DeviceNode 
+  type -> DeviceNodeType 
+  mass -> integer 
+  cost -> integer 
+  warrantyCost -> integer 
+  replaceCost -> integer 
+  ppm -> integer 
+  speedFactor -> integer 
+
+abstract HardwareConnector 
+  mass -> integer 
+  cost -> integer 
+  length -> integer 
+
+abstract PowerConnector : HardwareConnector 
+  source -> DeviceNode 
+  sink -> DeviceNode 
+
+abstract LoadPowerConnector : PowerConnector 
+abstract DevicePowerConnector : PowerConnector 
+
+abstract HardwareDataConnector : HardwareConnector 
+  endpoint -> DeviceNode 2..* 
+  deployedFrom -> FunctionConnector 1..* 
+    [this.deployedTo = this.parent]
+  transferTimePerSize -> integer 
+
+abstract DiscreteDataConnector : HardwareDataConnector 
+abstract AnalogDataConnector : HardwareDataConnector 
+
+abstract BusConnector : HardwareDataConnector 
+  [all e : endpoint | e.type = SmartDeviceNode]
+  xor type 
+    LowSpeedCAN 
+    HighSpeedCAN 
+    LIN 
+    FlexRay 
+
+abstract LogicalBusBridge : HardwareDataConnector 
+  bus -> BusConnector 2..2 
+  [all e : this.endpoint | e.type = SmartDeviceNode]
+
+// Automotive Concepts [TODO] 
+abstract ECU : DeviceNode 
+abstract Switch : DeviceNode 
+abstract Motor : DeviceNode 
+abstract Inline : DeviceNode 
+  abstract Pin : DeviceNode 
+// End Automotive Concepts 
+
+/*************** End Reference_Model ***************/ 
+
+/*************** Car ***************/ 
+
+Car : System 
+  [this.cost = CarHA.totalCost]
+  [this.mass = CarHA.totalMass]
+  [this.warrantyCost = CarHA.totalWarrantyCost]
+  CarArchitecture : Architecture 
+    CarHA : HardwareArchitecture 
+      [this.totalCost = CarDN.totalCost]
+      [this.totalMass = CarDN.totalMass]
+      [this.totalWarrantyCost = CarDN.totalWarrantyCost]
+      CarDN : DeviceNodeClassification 
+        [this.totalCost = BCM.cost + ElectricCenter.cost]
+        [this.totalMass = ElectricCenter.mass]
+        [this.totalWarrantyCost = BCM.warrantyCost + ElectricCenter.warrantyCost]
+        BCM : DeviceNode ? 
+          [this.mass = 408]
+          [this.cost = 460]
+          [this.replaceCost = 460]
+          [this.ppm = 50]
+          [this.warrantyCost = this.replaceCost * this.ppm]
+          [this.speedFactor = 50]
+          [this.type in (SmartDeviceNode)]
+        ElectricCenter : DeviceNode 
+          [this.mass = 0]
+          [this.cost = 0]
+          [this.replaceCost = 0]
+          [this.ppm = 10]
+          [this.warrantyCost = this.replaceCost * this.ppm]
+          [this.speedFactor = 0]
+          [this.type in (PowerDeviceNode)]
+
+/*************** End Car ***************/ 
+

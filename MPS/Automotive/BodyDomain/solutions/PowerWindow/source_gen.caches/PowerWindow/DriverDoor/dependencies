@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dependenciesRoot>
+  <dependency className="PowerWindow.DriverDoor.Car" file="Car.cfr" />
+  <dependency className="PowerWindow.DriverDoor.DriverWinSys" file="DriverWinSys.cfr" />
+  <dependency className="PowerWindow.DriverDoor.DriverWinSysFAA" file="DriverWinSysFAA.cfr" />
+  <dependency className="PowerWindow.DriverDoor.DriverWinSysFM" file="DriverWinSysFM.cfr" />
+  <dependency className="PowerWindow.DriverDoor.DriverWinSysHA" file="DriverWinSysHA.cfr" />
+  <dependency className="PowerWindow.DriverDoor.Reference_Model" file="Reference_Model.cfr" />
+</dependenciesRoot>
+

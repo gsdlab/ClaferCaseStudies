@@ -1,0 +1,94 @@
+/*************** EAST_ADL ***************/ 
+
+abstract System 
+abstract FeatureModel 
+abstract Architecture 
+abstract FunctionalAnalysis 
+abstract HardwareArchitecture 
+abstract DeviceNodeClassification 
+abstract CommTopology 
+abstract PowerTopology 
+abstract Deployment 
+  fa -> FunctionalAnalysis 
+  ht -> HardwareArchitecture 
+
+abstract Feature 
+
+abstract FunctionalAnalysisComponent 
+  deployedTo -> DeviceNode 
+
+abstract AnalysisFunction : FunctionalAnalysisComponent 
+  [deployedTo.type in SmartDeviceNode]
+
+abstract FunctionalDevice : FunctionalAnalysisComponent 
+  [deployedTo.type in (SmartDeviceNode , EEDeviceNode)]
+
+abstract FunctionConnector 
+  sender -> FunctionalAnalysisComponent 
+  receiver -> FunctionalAnalysisComponent 
+  deployedTo -> HardwareDataConnector ? 
+    [this.parent in this.deployedFrom]
+    [(sender.deployedTo , receiver.deployedTo) in (deployedTo.endpoint)]
+  [(sender.deployedTo = receiver.deployedTo) <=> this.deployedTo]
+
+
+enum DeviceNodeType = SmartDeviceNode | EEDeviceNode | PowerDeviceNode
+abstract DeviceNode 
+  type -> DeviceNodeType 
+
+abstract HardwareConnector 
+
+abstract PowerConnector : HardwareConnector 
+  source -> DeviceNode 
+  sink -> DeviceNode 
+
+abstract LoadPowerConnector : PowerConnector 
+abstract DevicePowerConnector : PowerConnector 
+
+abstract HardwareDataConnector : HardwareConnector 
+  endpoint -> DeviceNode 2..* 
+  deployedFrom -> FunctionConnector 1..* 
+    [this.deployedTo = this.parent]
+
+abstract DiscreteDataConnector : HardwareDataConnector 
+abstract AnalogDataConnector : HardwareDataConnector 
+
+abstract BusConnector : HardwareDataConnector 
+  [all e : endpoint | e.type = SmartDeviceNode]
+  xor type 
+    LowSpeedCAN 
+    HighSpeedCAN 
+    LIN 
+    FlexRay 
+
+abstract LogicalBusBridge : HardwareDataConnector 
+  bus -> BusConnector 2..2 
+  [all e : this.endpoint | e.type = SmartDeviceNode]
+
+// Automotive Concepts [TODO] 
+abstract ECU : DeviceNode 
+abstract Switch : DeviceNode 
+abstract Motor : DeviceNode 
+abstract Inline : DeviceNode 
+  abstract Pin : DeviceNode 
+// End Automotive Concepts 
+
+/*************** End EAST_ADL ***************/ 
+
+/*************** Car ***************/ 
+
+Car : System 
+  CarArchitecture : Architecture 
+    CarHA : HardwareArchitecture 
+      CarDN : DeviceNodeClassification 
+        BCM : DeviceNode 
+          [this.type in (SmartDeviceNode)]
+        ElectricCenter : DeviceNode 
+          [this.type in (PowerDeviceNode)]
+        TCM : DeviceNode 
+          [this.type in (SmartDeviceNode)]
+        CombinationMeter : DeviceNode 
+          [this.type in (SmartDeviceNode)]
+
+/*************** End Car ***************/ 
+

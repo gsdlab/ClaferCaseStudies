@@ -1,0 +1,972 @@
+//---------------------------- Meta-Model Elements --------------------------//
+// Meta-Model Elements - This section contains all meta-model elements that
+// are used to model a general automotive E/E architecture. Most of the 
+// elements are adapted from the EAST-ADL v2 specification.
+
+// System is our version of the EAST-ADL "System Model". The two are similiar
+// but have a couple differences:
+//  - The implementation level is ignored.
+//  - The analysis level and design level have been combined into the 
+//      architecture 
+//IMP: See https://github.com/gsdlab/clafer/issues/67
+// abstract System
+//     abstract FeatureModel
+//     abstract Architecture
+//         abstract FunctionalAnalysis
+//         abstract HardwareArchitecture
+//             abstract DeviceNodeClassification
+//             abstract CommTopology
+//             abstract PowerTopology
+//         abstract Deployment
+//             fa -> FunctionalAnalysis
+//             ha -> HardwareArchitecture
+abstract System
+abstract FeatureModel
+abstract Architecture
+abstract FunctionalAnalysis
+abstract HardwareArchitecture
+abstract DeviceNodeClassification
+abstract CommTopology
+abstract PowerTopology
+abstract Deployment
+
+// Some generic "types" of Clafer's. Some types don't have properties but
+// are rather used for readability for a user
+abstract Feature
+
+abstract FunctionalAnalysisComponent
+    deployedTo -> DeviceNode
+    xor implementation
+        hardware
+            [latency = baseLatency]
+            [deployedTo.type in (EEDeviceNode, SmartDeviceNode)]
+        software
+            [latency = baseLatency*deployedTo.speedFactor]
+            [deployedTo.type in SmartDeviceNode]
+    baseLatency -> integer // [ms]
+    latency -> integer // [ms]
+abstract AnalysisFunction : FunctionalAnalysisComponent
+abstract FunctionalDevice : FunctionalAnalysisComponent
+abstract FunctionConnector
+    sender -> FunctionalAnalysisComponent
+    receiver -> FunctionalAnalysisComponent
+    deployedTo -> HardwareDataConnector ?
+        [parent in this.deployedFrom]
+        [(sender.deployedTo.dref, receiver.deployedTo.dref) in (deployedTo.endpoint.dref)]
+    [(sender.deployedTo.dref = receiver.deployedTo.dref) <=> no this.deployedTo]
+    latency -> integer // [us]
+    messageSize -> integer // [byte]
+    [if (deployedTo) then (latency = messageSize*deployedTo.transferTimePerSize) else (latency = 0)]
+
+
+enum DeviceNodeType = SmartDeviceNode | EEDeviceNode | PowerDeviceNode
+
+abstract DeviceNode
+    type -> DeviceNodeType
+    speedFactor -> integer // unitless
+    mass -> integer // [g]
+    cost -> integer // [dollar]
+    ppm -> integer // unitless
+    replaceCost -> integer // [dollar]
+    warrantyCost -> integer = ppm*replaceCost // [dollar per million]
+    [(type in (PowerDeviceNode, EEDeviceNode)) => (speedFactor = 0)]
+
+
+// Hardware Connection Mediums
+abstract HardwareConnector
+    length -> integer // [cm]
+    mass -> integer // [mg]
+    cost -> integer // [dollar per thousand]
+abstract PowerConnector : HardwareConnector
+    source -> DeviceNode
+    sink -> DeviceNode
+abstract LoadPowerConnector : PowerConnector
+    [mass = Data.MassPerLength.LoadPowerConnector*length]
+    [cost = Data.CostPerLength.LoadPowerConnector*length]
+abstract DevicePowerConnector : PowerConnector
+    [mass = Data.MassPerLength.DevicePowerConnector*length]
+    [cost = Data.CostPerLength.DevicePowerConnector*length]
+
+abstract HardwareDataConnector : HardwareConnector
+    endpoint -> DeviceNode 2..*
+    deployedFrom -> FunctionConnector 1..*
+        [this.deployedTo = parent]
+    transferTimePerSize -> integer // [us/byte]
+        
+abstract DiscreteDataConnector : HardwareDataConnector
+    [mass = length*(#deployedFrom)*Data.MassPerLength.DiscreteDataConnector]
+    [transferTimePerSize = 0]
+    [cost = Data.CostPerLength.DiscreteDataConnector*length*(#deployedFrom)]
+
+abstract AnalogDataConnector : HardwareDataConnector
+    [mass = length*(#deployedFrom)*Data.MassPerLength.AnalogDataConnector]
+    [transferTimePerSize = 0]
+    [cost = Data.CostPerLength.AnalogDataConnector*length*(#deployedFrom)]
+
+abstract BusConnector : HardwareDataConnector
+    [endpoint.type = SmartDeviceNode]
+    xor type
+        LowSpeedCAN
+            [transferTimePerSize = Data.TimePerSize.LowSpeedCANBus]
+            [mass = Data.MassPerLength.LowSpeedCANBus*length]
+            [cost = Data.CostPerLength.LowSpeedCANBus*length]
+        HighSpeedCAN
+            [transferTimePerSize = Data.TimePerSize.HighSpeedCANBus]
+            [mass = Data.MassPerLength.HighSpeedCANBus*length]
+            [cost = Data.CostPerLength.HighSpeedCANBus*length]
+        LIN
+            [transferTimePerSize = Data.TimePerSize.LINBus]
+            [mass = Data.MassPerLength.LINBus*length]
+            [cost = Data.CostPerLength.LINBus*length]
+        FlexRay
+            [transferTimePerSize = Data.TimePerSize.FlexRayBus]
+            [mass = Data.MassPerLength.FlexRayBus*length]
+            [cost = Data.CostPerLength.FlexRayBus*length]
+
+abstract LogicalBusBridge : HardwareDataConnector
+    [endpoint.type = SmartDeviceNode]
+    bus -> BusConnector 2
+    gatewayTransferTimePerSize -> integer // [us/byte]
+    [transferTimePerSize = gatewayTransferTimePerSize + sum(bus.transferTimePerSize)]
+    [length = 0]
+    [mass = 0]
+    [cost = 0]
+
+
+// ---------------------- Quality Attribute Data -----------------------------//
+Data
+    MassPerLength // [mg/cm]
+        LoadPowerConnector -> integer = 185
+        DevicePowerConnector -> integer = 104
+        DiscreteDataConnector -> integer = 110
+        AnalogDataConnector -> integer = 110
+        LowSpeedCANBus -> integer = 20
+        HighSpeedCANBus -> integer = 20
+        LINBus -> integer = 20
+        FlexRayBus -> integer = 40
+    CostPerLength // [dollar per thousand / cm]
+        LoadPowerConnector -> integer = 9
+        DevicePowerConnector -> integer = 9 
+        DiscreteDataConnector -> integer = 13
+        AnalogDataConnector -> integer = 13
+        LowSpeedCANBus -> integer = 52
+        HighSpeedCANBus -> integer = 104
+        LINBus -> integer = 26
+        FlexRayBus -> integer = 208
+    TimePerSize // [us/byte]
+        LowSpeedCANBus -> integer = 64
+        HighSpeedCANBus -> integer = 32
+        LINBus -> integer = 400
+        FlexRayBus -> integer = 1
+    BusProtocolOverhead // [byte]
+        LowSpeedCANBus -> integer = 5
+        HighSpeedCANBus -> integer = 5
+        LINBus -> integer = 4
+        FlexRayBus -> integer = 8
+    ReferenceSpeedFactor -> integer = 10
+
+//------------------- Door Lock Abstract Clafer --------------------------//
+// Door Lock Abstract Clafer - This section contains all abstract clafers
+// that detail a generic system/component that can be used in the concerete
+// system model.
+abstract DoorLockFA : FunctionalAnalysis
+    // -------  Core Components ---------------//
+    // Cylinder Switches
+    DriverDoorCylinderSwitch : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    PassDoorCylinderSwitch : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    driverCylReq : FunctionConnector
+        [messageSize = 1]
+        [sender = DriverDoorCylinderSwitch && receiver = DoorLockControl]
+    passCylReq : FunctionConnector
+        [messageSize = 1]
+        [sender = PassDoorCylinderSwitch && receiver = DoorLockControl]
+    // Door Contacts
+    DriverDoorContact : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    PassDoorContact : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    RearRightPassDoorContact : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    RearLeftPassDoorContact : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    driverContactSignal : FunctionConnector
+        [messageSize = 1]
+        [sender = DriverDoorContact && receiver = DoorLockControl]
+    passContactSignal : FunctionConnector
+        [messageSize = 1]
+        [sender = PassDoorContact && receiver = DoorLockControl]
+    rearRightPassContactSignal : FunctionConnector
+        [messageSize = 1]
+        [sender = RearRightPassDoorContact && receiver = DoorLockControl]
+    rearLeftPassContactSignal : FunctionConnector
+        [messageSize = 1]
+        [sender = RearLeftPassDoorContact && receiver = DoorLockControl]
+    // Door Lock Sensors
+    DriverDoorLockSensor : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    PassDoorLockSensor : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    RearRightPassDoorLockSensor : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    RearLeftPassDoorLockSensor : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    driverLockPosition : FunctionConnector
+        [messageSize = 1]
+        [sender = DriverDoorLockSensor && receiver = DoorLockControl]
+    passLockPosition : FunctionConnector
+        [messageSize = 1]
+        [sender = PassDoorLockSensor && receiver = DoorLockControl]
+    rearRightPassLockPosition : FunctionConnector
+        [messageSize = 1]
+        [sender = RearRightPassDoorLockSensor && receiver = DoorLockControl]
+    rearLeftPassLockPosition : FunctionConnector
+        [messageSize = 1]
+        [sender = RearLeftPassDoorLockSensor && receiver = DoorLockControl]
+    // Door Lock Control
+    DoorLockControl : AnalysisFunction
+        [implementation.software]
+        [baseLatency = 4]
+    driverLockCmd : FunctionConnector
+        [messageSize = 1]
+        [sender = DoorLockControl && receiver = DriverDoorLockMotor]
+    passLockCmd : FunctionConnector
+        [messageSize = 1]
+        [sender = DoorLockControl && receiver = PassDoorLockMotor]
+    rearRightLockCmd : FunctionConnector
+        [messageSize = 1]
+        [sender = DoorLockControl && receiver = RearRightPassDoorLockMotor]
+    rearLeftLockCmd : FunctionConnector
+        [messageSize = 1]
+        [sender = DoorLockControl && receiver = RearLeftPassDoorLockMotor]
+    // Door Lock Motor
+    DriverDoorLockMotor : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    PassDoorLockMotor : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    RearRightPassDoorLockMotor : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    RearLeftPassDoorLockMotor : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    // Gear Position Sensor
+    GearPositionSensor : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    gearPostion : FunctionConnector
+        [messageSize = 1]
+        [sender = GearPositionSensor && receiver = DoorLockControl]
+
+    // ----- Optional Fragments/Components --------//
+    // Speed Smart Lock FA Components
+    SpeedSmartLockFA : FunctionalAnalysis ?
+        SpeedSensor : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+        speed : FunctionConnector
+            [messageSize = 1]
+            [sender = SpeedSensor && receiver = DoorLockControl]
+    // Central or Distributed Lock Switch
+    xor DoorLockButtonFA
+        IndividualLockSwitchFA : FunctionalAnalysis
+            DriverDoorLockButton : FunctionalDevice
+                [implementation.hardware]
+                [baseLatency = 10]
+            PassDoorLockButton : FunctionalDevice
+                [implementation.hardware]
+                [baseLatency = 10]
+            driverDoorLockReq : FunctionConnector
+                [messageSize = 1]
+                [sender = DriverDoorLockButton && receiver = DoorLockControl]
+            passDoorLockReq : FunctionConnector
+                [messageSize = 1]
+                [sender = PassDoorLockButton && receiver = DoorLockControl]
+        CentralLockSwitchFA : FunctionalAnalysis
+            CentralLockButton : FunctionalDevice
+                [implementation.hardware]
+                [baseLatency = 10]
+            centralDoorLockReq : FunctionConnector
+                [messageSize = 1]
+                [sender = CentralLockButton && receiver = DoorLockControl]
+
+    RemoteKeyAccessFA : FunctionalAnalysis ?
+        CentralRFAntenna : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+        CentralRFReceiver : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+        IDAuthentication : AnalysisFunction
+            [implementation.software]
+            [baseLatency = 4]
+
+        centralAntennaSignal : FunctionConnector
+            [messageSize = 1]
+            [sender = CentralRFAntenna && receiver = CentralRFReceiver]
+        centralReceiverMsg : FunctionConnector
+            [messageSize = 1]
+            [sender = CentralRFReceiver && receiver = IDAuthentication]
+        authenticationMsg : FunctionConnector
+            [messageSize = 1]
+            [sender = IDAuthentication && receiver = DoorLockControl]
+
+    PassiveKeyEntryFA : FunctionalAnalysis ?
+        DriverOutsideLFAntenna : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+        DriverLFTransmitter : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+        PassOutsideLFAntenna : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+        PassLFTransmitter : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+        InsideFrontLFAntenna : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+        InsideCenterLFAntenna : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+        InsideRearLFAntenna : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+        InsideLFTransmitter : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+
+        driverTransMsg : FunctionConnector
+            [messageSize = 1]
+            [sender = DriverLFTransmitter && receiver = DriverOutsideLFAntenna]
+        passTransMsg : FunctionConnector
+            [messageSize = 1]
+            [sender = PassLFTransmitter && receiver = PassOutsideLFAntenna]
+        insideFrontTransMsg : FunctionConnector
+            [messageSize = 1]
+            [sender = InsideLFTransmitter && receiver = InsideFrontLFAntenna]
+        insideCenterTransMsg : FunctionConnector
+            [messageSize = 1]
+            [sender = InsideLFTransmitter && receiver = InsideCenterLFAntenna]
+        insideRearTransMsg : FunctionConnector
+            [messageSize = 1]
+            [sender = InsideLFTransmitter && receiver = InsideRearLFAntenna]
+
+
+        xor OutsideDoorHandleSensor
+            ButtonSensor
+                DriverDoorButtonSensor : FunctionalDevice
+                    [implementation.hardware]
+                    [baseLatency = 10]
+                PassDoorButtonSensor : FunctionalDevice
+                    [implementation.hardware]
+                    [baseLatency = 10]
+            CapacitiveSensor
+                DriverDoorCapacitiveSensor : FunctionalDevice
+                    [implementation.hardware]
+                    [baseLatency = 10]
+                PassDoorCapacitiveSensor : FunctionalDevice
+                    [implementation.hardware]
+                    [baseLatency = 10]
+
+        PKEControl : AnalysisFunction
+            [implementation.software]
+            [baseLatency = 4]
+
+        driverDoorHandleReq : FunctionConnector
+            [messageSize = 1]
+            [sender in (OutsideDoorHandleSensor.ButtonSensor.DriverDoorButtonSensor,
+                OutsideDoorHandleSensor.CapacitiveSensor.DriverDoorCapacitiveSensor) && receiver = PKEControl]
+        passDoorHandleReq : FunctionConnector
+            [messageSize = 1]
+            [sender in (OutsideDoorHandleSensor.ButtonSensor.PassDoorButtonSensor,
+                OutsideDoorHandleSensor.CapacitiveSensor.PassDoorCapacitiveSensor) && receiver = PKEControl]
+        driverPKEReq : FunctionConnector
+            [messageSize = 1]
+            [sender = PKEControl && receiver = DriverLFTransmitter]
+        passPKEReq : FunctionConnector
+            [messageSize = 1]
+            [sender = PKEControl && receiver = PassLFTransmitter]
+        insidePKEReq : FunctionConnector
+            [messageSize = 1]
+            [sender = PKEControl && receiver = InsideLFTransmitter]
+        doorLockControlReq : FunctionConnector
+            [messageSize = 1]
+            [sender = DoorLockControl && receiver = PKEControl]
+
+abstract DoorLockDN : DeviceNodeClassification
+    //---------- Core Device Nodes ----------------//
+    DriverDoorLockMotorAssembly : DeviceNode
+        [type = EEDeviceNode]
+        [cost = 144]
+        [ppm = 20]
+        [replaceCost = 144]
+        [mass = 104]
+    PassengerDoorLockMotorAssembly : DeviceNode
+        [type = EEDeviceNode]
+        [cost = 144]
+        [ppm = 20]
+        [replaceCost = 144]
+        [mass = 104]
+    RearRightPassengerDoorLockMotorAssembly : DeviceNode
+        [type = EEDeviceNode]
+        [cost = 144]
+        [ppm = 20]
+        [replaceCost = 144]
+        [mass = 104]
+    RearLeftPassengerDoorLockMotorAssembly : DeviceNode
+        [type = EEDeviceNode]
+        [cost = 144]
+        [ppm = 20]
+        [replaceCost = 144]
+        [mass = 104]
+    TCM -> DeviceNode
+    BCM -> DeviceNode
+    EC -> DeviceNode
+
+    // ------- Optional Device Nodes ---------------//
+    // Speed Smart Lock Nodes
+    CombinationMeter -> DeviceNode ?
+
+    // Central or Individual Lock Nodes
+    xor DoorLockButtonDN
+        IndividualLockSwitchDN : DeviceNodeClassification
+            DriverLockPowerSwitch : DeviceNode
+                [type = EEDeviceNode]
+                [cost = 23]
+                [replaceCost = 23]
+                [ppm = 10]
+                [mass = 28]
+            PassLockPowerSwitch : DeviceNode
+                [type = EEDeviceNode]
+                [cost = 23]
+                [replaceCost = 23]
+                [ppm = 10]
+                [mass = 28]
+        CentralLockSwitchDN
+            CenterLockPowerSwitch : DeviceNode
+                [type = EEDeviceNode]
+                [cost = 23]
+                [replaceCost = 23]
+                [ppm = 10]
+                [mass = 28]
+
+    RemoteKeyAccessDN : DeviceNodeClassification ?
+        CentralRFAntennaModule : DeviceNode
+            [type = SmartDeviceNode]
+            [mass = 91]
+            [cost = 57]
+            [ppm = 50]
+            [replaceCost = 57]
+            [speedFactor = 10]
+
+    PassiveKeyEntryDN : DeviceNodeClassification ?
+        Transmitter : DeviceNode ?
+            [type = EEDeviceNode]
+            [mass = 397]
+            [cost = 239]
+            [ppm = 50]
+            [replaceCost = 293]
+        PassiveKeyModule : DeviceNode ?
+            [type = SmartDeviceNode]
+            [mass = 408]
+            [cost = 191]
+            [ppm = 50]
+            [replaceCost = 191]
+            [speedFactor = 50]
+        xor OutsideDoorHandleSensor
+            ButtonSensor
+                DriverDoorButtonHandleModule : DeviceNode
+                    [type = EEDeviceNode]
+                    [mass = 408]
+                    [cost = 41]
+                    [ppm = 10]
+                    [replaceCost = 41]
+                PassDoorButtonHandleModule : DeviceNode
+                    [type = EEDeviceNode]
+                    [mass = 408]
+                    [cost = 41]
+                    [ppm = 10]
+                    [replaceCost = 41]    
+            CapacitiveSensor
+                DriverDoorCapacitiveHandleModule : DeviceNode
+                    [type = EEDeviceNode]
+                    [mass = 198]
+                    [cost = 218]
+                    [ppm = 10]
+                    [replaceCost = 218]
+                PassDoorCapacitiveHandleModule : DeviceNode
+                    [type = EEDeviceNode]
+                    [mass = 198]
+                    [cost = 218]
+                    [ppm = 10]
+                    [replaceCost = 218]
+        InsideFrontLFAntenna : DeviceNode
+            [type = EEDeviceNode]
+            [mass = 198]
+            [cost = 57]
+            [ppm = 10]
+            [replaceCost = 57]
+        InsideCenterLFAntenna : DeviceNode
+            [type = EEDeviceNode]
+            [mass = 198]
+            [cost = 57]
+            [ppm = 10]
+            [replaceCost = 57]
+        InsideRearLFAntenna : DeviceNode
+            [type = EEDeviceNode]
+            [mass = 198]
+            [cost = 57]
+            [ppm = 10]
+            [replaceCost = 57]
+
+abstract DoorLockPT : PowerTopology
+    dn -> DoorLockDN
+
+    // Motor Load Power
+    driverMotorLP : LoadPowerConnector
+        [length = 10]
+        [source = dn.BCM.dref && sink = dn.DriverDoorLockMotorAssembly]
+    passMotorLP : LoadPowerConnector
+        [length = 15]
+        [source = dn.BCM.dref && sink = dn.PassengerDoorLockMotorAssembly]
+    rearRightPassMotorLP : LoadPowerConnector
+        [length = 25]
+        [source = dn.BCM.dref && sink = dn.RearRightPassengerDoorLockMotorAssembly]
+    rearLeftPassMotorLP : LoadPowerConnector
+        [length = 30]
+        [source = dn.BCM.dref && sink = dn.RearLeftPassengerDoorLockMotorAssembly]
+
+    // Remote Key Access Device Power
+    centralRFModuleDP : DevicePowerConnector ?
+        [length = 10]
+        [source = dn.EC.dref && sink = dn.RemoteKeyAccessDN.CentralRFAntennaModule]
+
+    // Passive Key Entry Device Power
+    pkeModuleDP : DevicePowerConnector ?
+        [length = 4]
+        [source = dn.EC.dref && sink = dn.PassiveKeyEntryDN.PassiveKeyModule]
+    transmitterDP : DevicePowerConnector ?
+        [length = 5]
+        [source = dn.EC.dref && sink = dn.PassiveKeyEntryDN.Transmitter]
+    driverCapacitiveSensorDP : DevicePowerConnector ?
+        [length = 11]
+        [source = dn.EC.dref && sink = dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.DriverDoorCapacitiveHandleModule]
+    passCapacitiveSensorDP : DevicePowerConnector ?
+        [length = 16]
+        [source = dn.EC.dref && sink = dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.PassDoorCapacitiveHandleModule]
+
+abstract DoorLockCT : CommTopology
+    dn -> DoorLockDN
+
+    // Busses
+    logicalLowSpeedBus : BusConnector ? // This is the logical bus connecting lower priority ECU's such as in the body domain
+        [type.LIN || type.LowSpeedCAN]
+        [length = 45]
+        [endpoint in (dn.BCM.dref, dn.RemoteKeyAccessDN.CentralRFAntennaModule, dn.PassiveKeyEntryDN.PassiveKeyModule)]
+    logicalHighSpeedBus : BusConnector // This is the logical bus connecting high priority ECU's such as vehicle control
+        [type.HighSpeedCAN || type.FlexRay]
+        [length = 30]
+        [endpoint in (dn.BCM.dref, dn.TCM.dref, dn.CombinationMeter.dref)]
+
+    // Logical Discrete Wires
+    logicalBCMDriverMotorAssemblyDW : DiscreteDataConnector
+        [length = 12]
+        [endpoint = (dn.BCM.dref, dn.DriverDoorLockMotorAssembly)]
+    logicalBCMPassMotorAssemblyDW : DiscreteDataConnector
+        [length = 17]
+        [endpoint = (dn.BCM.dref, dn.PassengerDoorLockMotorAssembly)]
+    logicalBCMRearRightPassMotorAssemblyDW : DiscreteDataConnector
+        [length = 27]
+        [endpoint = (dn.BCM.dref, dn.RearRightPassengerDoorLockMotorAssembly)]
+    logicalBCMRearLeftPassMotorAssemblyDW : DiscreteDataConnector
+        [length = 32]
+        [endpoint = (dn.BCM.dref, dn.RearLeftPassengerDoorLockMotorAssembly)]
+    logicalBCMDriverLockPowerSwitchDW : DiscreteDataConnector ?
+        [length = 14]
+        [endpoint = (dn.BCM.dref, dn.DoorLockButtonDN.IndividualLockSwitchDN.DriverLockPowerSwitch)]
+    logicalBCMPassLockPowerSwitchDW : DiscreteDataConnector ?
+        [length = 19]
+        [endpoint = (dn.BCM.dref, dn.DoorLockButtonDN.IndividualLockSwitchDN.PassLockPowerSwitch)]
+    logicalBCMCenterLockPowerSwitchDW : DiscreteDataConnector ?
+        [length = 3]
+        [endpoint = (dn.BCM.dref, dn.DoorLockButtonDN.CentralLockSwitchDN.CenterLockPowerSwitch)]
+
+    logicalBCMDriverCapacitiveSensorModule : AnalogDataConnector ?
+        [length = 15]
+        [endpoint = (dn.BCM.dref, dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.DriverDoorCapacitiveHandleModule)]
+    logicalBCMPassCapacitiveSensorModule : AnalogDataConnector ?
+        [length = 20]
+        [endpoint = (dn.BCM.dref, dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.PassDoorCapacitiveHandleModule)]
+    logicalBCMDriverButtonSensorModule : AnalogDataConnector ?
+        [length = 15]
+        [endpoint = (dn.BCM.dref, dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.ButtonSensor.DriverDoorButtonHandleModule)]
+    logicalBCMPassButtonSensorModule : AnalogDataConnector ?
+        [length = 20]
+        [endpoint = (dn.BCM.dref, dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.ButtonSensor.PassDoorButtonHandleModule)]
+
+    logicalPKEModuleDriverCapacitiveSensorModule : DiscreteDataConnector ?
+        [length = 15]
+        [endpoint = (dn.PassiveKeyEntryDN.PassiveKeyModule, dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.DriverDoorCapacitiveHandleModule)]
+    logicalPKEModulePassCapacitiveSensorModule : DiscreteDataConnector ?
+        [length = 20]
+        [endpoint = (dn.PassiveKeyEntryDN.PassiveKeyModule, dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.PassDoorCapacitiveHandleModule)]
+    logicalPKEModuleDriverButtonSensorModule : DiscreteDataConnector ?
+        [length = 15]
+        [endpoint = (dn.PassiveKeyEntryDN.PassiveKeyModule, dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.ButtonSensor.DriverDoorButtonHandleModule)]
+    logicalPKEModulePassButtonSensorModule : DiscreteDataConnector ?
+        [length = 20]
+        [endpoint = (dn.PassiveKeyEntryDN.PassiveKeyModule, dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.ButtonSensor.PassDoorButtonHandleModule)]
+
+    logicalTransmitterDriverCapacitiveSensorModule : AnalogDataConnector ?
+        [length = 15]
+        [endpoint = (dn.PassiveKeyEntryDN.Transmitter, dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.DriverDoorCapacitiveHandleModule)]
+    logicalTransmitterPassCapacitiveSensorModule : AnalogDataConnector ?
+        [length = 20]
+        [endpoint = (dn.PassiveKeyEntryDN.Transmitter, dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.PassDoorCapacitiveHandleModule)]
+    logicalTransmitterDriverButtonSensorModule : AnalogDataConnector ?
+        [length = 15]
+        [endpoint = (dn.PassiveKeyEntryDN.Transmitter, dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.ButtonSensor.DriverDoorButtonHandleModule)]
+    logicalTransmitterPassButtonSensorModule : AnalogDataConnector ?
+        [length = 20]
+        [endpoint = (dn.PassiveKeyEntryDN.Transmitter, dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.ButtonSensor.PassDoorButtonHandleModule)]
+
+    logicalPKEModuleTransmitter : DiscreteDataConnector ?
+        [length = 5]
+        [endpoint = (dn.PassiveKeyEntryDN.PassiveKeyModule, dn.PassiveKeyEntryDN.Transmitter)]
+
+    logicalBCMInsideFrontAntenna : AnalogDataConnector ?
+        [length = 13]
+        [endpoint = (dn.BCM.dref, dn.PassiveKeyEntryDN.InsideFrontLFAntenna)]
+    logicalTransmitterInsideFrontAntenna : AnalogDataConnector ?
+        [length = 1]
+        [endpoint = (dn.PassiveKeyEntryDN.Transmitter, dn.PassiveKeyEntryDN.InsideFrontLFAntenna)]
+    logicalBCMInsideCenterAntenna : AnalogDataConnector ?
+        [length = 6]
+        [endpoint = (dn.BCM.dref, dn.PassiveKeyEntryDN.InsideCenterLFAntenna)]
+    logicalTransmitterInsideCenterAntenna : AnalogDataConnector ?
+        [length = 4]
+        [endpoint = (dn.PassiveKeyEntryDN.Transmitter, dn.PassiveKeyEntryDN.InsideCenterLFAntenna)]
+    logicalBCMInsideRearAntenna : AnalogDataConnector ?   
+        [length = 14]
+        [endpoint = (dn.BCM.dref, dn.PassiveKeyEntryDN.InsideRearLFAntenna)]
+    logicalTransmitterInsideRearAntenna : AnalogDataConnector ?
+        [length = 12]
+        [endpoint = (dn.PassiveKeyEntryDN.Transmitter, dn.PassiveKeyEntryDN.InsideRearLFAntenna)]
+    
+
+
+abstract DoorLockHA : HardwareArchitecture
+    dn -> DoorLockDN
+    pt -> DoorLockPT
+    ct -> DoorLockCT
+
+abstract DoorLockDpl : Deployment
+    fa -> DoorLockFA
+    ha -> DoorLockHA
+
+    // Cylinder Switch Deployment
+    [fa.DriverDoorCylinderSwitch.deployedTo = ha.dn.DriverDoorLockMotorAssembly]
+    [fa.PassDoorCylinderSwitch.deployedTo = ha.dn.PassengerDoorLockMotorAssembly]
+
+    // Door Contacts Deployment
+    [fa.DriverDoorContact.deployedTo = ha.dn.DriverDoorLockMotorAssembly]
+    [fa.PassDoorContact.deployedTo = ha.dn.PassengerDoorLockMotorAssembly]
+    [fa.RearRightPassDoorContact.deployedTo = ha.dn.RearRightPassengerDoorLockMotorAssembly]
+    [fa.RearLeftPassDoorContact.deployedTo = ha.dn.RearLeftPassengerDoorLockMotorAssembly]
+
+    // Door Lock Sensors Deployment
+    [fa.DriverDoorLockSensor.deployedTo = ha.dn.DriverDoorLockMotorAssembly]
+    [fa.PassDoorLockSensor.deployedTo = ha.dn.PassengerDoorLockMotorAssembly]
+    [fa.RearRightPassDoorLockSensor.deployedTo = ha.dn.RearRightPassengerDoorLockMotorAssembly]
+    [fa.RearLeftPassDoorLockSensor.deployedTo = ha.dn.RearLeftPassengerDoorLockMotorAssembly]
+
+    // Door Lock Control Deployment
+    [fa.DoorLockControl.deployedTo = ha.dn.BCM.dref]
+
+
+    // Door Lock Motor Deployment
+    [fa.DriverDoorLockMotor.deployedTo = ha.dn.DriverDoorLockMotorAssembly]
+    [fa.PassDoorLockMotor.deployedTo = ha.dn.PassengerDoorLockMotorAssembly]
+    [fa.RearRightPassDoorLockMotor.deployedTo = ha.dn.RearRightPassengerDoorLockMotorAssembly]
+    [fa.RearLeftPassDoorLockMotor.deployedTo = ha.dn.RearLeftPassengerDoorLockMotorAssembly]
+
+    // Gear Position Sensor Deployment
+    [fa.GearPositionSensor.deployedTo = ha.dn.TCM.dref]
+
+    // Speed Sensor Deployment
+    [fa.SpeedSmartLockFA => (fa.SpeedSmartLockFA.SpeedSensor.deployedTo = ha.dn.CombinationMeter.dref)]
+
+    // Power Button Unlock Deployment
+    [fa.DoorLockButtonFA.IndividualLockSwitchFA => (fa.DoorLockButtonFA.IndividualLockSwitchFA.DriverDoorLockButton.deployedTo = ha.dn.DoorLockButtonDN.IndividualLockSwitchDN.DriverLockPowerSwitch)]
+    [fa.DoorLockButtonFA.IndividualLockSwitchFA => (fa.DoorLockButtonFA.IndividualLockSwitchFA.PassDoorLockButton.deployedTo = ha.dn.DoorLockButtonDN.IndividualLockSwitchDN.PassLockPowerSwitch)]
+    [fa.DoorLockButtonFA.CentralLockSwitchFA => (fa.DoorLockButtonFA.CentralLockSwitchFA.CentralLockButton.deployedTo = ha.dn.DoorLockButtonDN.CentralLockSwitchDN.CenterLockPowerSwitch)]
+
+    // Remote Key Access Deployment
+    [fa.RemoteKeyAccessFA => (fa.RemoteKeyAccessFA.CentralRFAntenna.deployedTo = ha.dn.RemoteKeyAccessDN.CentralRFAntennaModule)]
+    [fa.RemoteKeyAccessFA => (fa.RemoteKeyAccessFA.CentralRFReceiver.deployedTo = ha.dn.RemoteKeyAccessDN.CentralRFAntennaModule)]
+    [fa.RemoteKeyAccessFA => (fa.RemoteKeyAccessFA.IDAuthentication.deployedTo in (ha.dn.BCM.dref, ha.dn.RemoteKeyAccessDN.CentralRFAntennaModule, ha.dn.PassiveKeyEntryDN.PassiveKeyModule))]
+
+    // Passive Key Entry Deployment
+    PassiveKeyEntryDpl ?
+        xor OutsideDoorHandleSensor
+            ButtonSensor
+                [ha.dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.ButtonSensor && fa.PassiveKeyEntryFA.OutsideDoorHandleSensor.ButtonSensor]
+                [fa.PassiveKeyEntryFA.OutsideDoorHandleSensor.ButtonSensor.DriverDoorButtonSensor.deployedTo = ha.dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.ButtonSensor.DriverDoorButtonHandleModule]
+                [fa.PassiveKeyEntryFA.OutsideDoorHandleSensor.ButtonSensor.PassDoorButtonSensor.deployedTo = ha.dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.ButtonSensor.PassDoorButtonHandleModule]        
+                [fa.PassiveKeyEntryFA.DriverOutsideLFAntenna.deployedTo = ha.dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.ButtonSensor.DriverDoorButtonHandleModule]
+                [fa.PassiveKeyEntryFA.PassOutsideLFAntenna.deployedTo = ha.dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.ButtonSensor.PassDoorButtonHandleModule]
+            CapacitiveSensor
+                [ha.dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor && fa.PassiveKeyEntryFA.OutsideDoorHandleSensor.CapacitiveSensor]
+                [fa.PassiveKeyEntryFA.OutsideDoorHandleSensor.CapacitiveSensor.DriverDoorCapacitiveSensor.deployedTo = ha.dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.DriverDoorCapacitiveHandleModule]
+                [fa.PassiveKeyEntryFA.OutsideDoorHandleSensor.CapacitiveSensor.PassDoorCapacitiveSensor.deployedTo = ha.dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.PassDoorCapacitiveHandleModule]
+                [fa.PassiveKeyEntryFA.DriverOutsideLFAntenna.deployedTo = ha.dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.DriverDoorCapacitiveHandleModule]
+                [fa.PassiveKeyEntryFA.PassOutsideLFAntenna.deployedTo = ha.dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.PassDoorCapacitiveHandleModule]  
+        
+
+        [fa.PassiveKeyEntryFA.DriverLFTransmitter.deployedTo in (ha.dn.PassiveKeyEntryDN.Transmitter, ha.dn.BCM.dref)]
+        [fa.PassiveKeyEntryFA.PassLFTransmitter.deployedTo in (ha.dn.PassiveKeyEntryDN.Transmitter, ha.dn.BCM.dref)]
+
+        [fa.PassiveKeyEntryFA.InsideFrontLFAntenna.deployedTo = ha.dn.PassiveKeyEntryDN.InsideFrontLFAntenna]
+        [fa.PassiveKeyEntryFA.InsideCenterLFAntenna.deployedTo = ha.dn.PassiveKeyEntryDN.InsideCenterLFAntenna]
+        [fa.PassiveKeyEntryFA.InsideRearLFAntenna.deployedTo = ha.dn.PassiveKeyEntryDN.InsideRearLFAntenna]
+        [fa.PassiveKeyEntryFA.InsideLFTransmitter.deployedTo in (ha.dn.PassiveKeyEntryDN.Transmitter, ha.dn.BCM.dref)]
+
+        [fa.PassiveKeyEntryFA.PKEControl.deployedTo in (ha.dn.BCM.dref, ha.dn.PassiveKeyEntryDN.PassiveKeyModule)]
+
+    // Power Topology Deployment
+    [ha.pt.pkeModuleDP <=> ha.dn.PassiveKeyEntryDN.PassiveKeyModule]
+    [ha.pt.driverCapacitiveSensorDP <=> ha.dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.DriverDoorCapacitiveHandleModule]
+    [ha.pt.passCapacitiveSensorDP <=> ha.dn.PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor.PassDoorCapacitiveHandleModule]
+    [ha.pt.centralRFModuleDP <=> ha.dn.RemoteKeyAccessDN]
+    [ha.pt.transmitterDP <=> ha.dn.PassiveKeyEntryDN.Transmitter]
+
+    // Communication Deployment
+    [fa.driverCylReq.deployedTo = ha.ct.logicalBCMDriverMotorAssemblyDW]
+    [fa.passCylReq.deployedTo = ha.ct.logicalBCMPassMotorAssemblyDW]
+
+    [fa.driverContactSignal.deployedTo = ha.ct.logicalBCMDriverMotorAssemblyDW]
+    [fa.passContactSignal.deployedTo  = ha.ct.logicalBCMPassMotorAssemblyDW]
+    [fa.rearRightPassContactSignal.deployedTo = ha.ct.logicalBCMRearRightPassMotorAssemblyDW]
+    [fa.rearLeftPassContactSignal.deployedTo = ha.ct.logicalBCMRearLeftPassMotorAssemblyDW]
+
+    [fa.driverLockPosition.deployedTo = ha.ct.logicalBCMDriverMotorAssemblyDW]
+    [fa.passLockPosition.deployedTo = ha.ct.logicalBCMPassMotorAssemblyDW]
+    [fa.rearRightPassLockPosition.deployedTo = ha.ct.logicalBCMRearRightPassMotorAssemblyDW]
+    [fa.rearLeftPassLockPosition.deployedTo = ha.ct.logicalBCMRearLeftPassMotorAssemblyDW]
+
+    [fa.driverLockCmd.deployedTo = ha.ct.logicalBCMDriverMotorAssemblyDW]
+    [fa.passLockCmd.deployedTo = ha.ct.logicalBCMPassMotorAssemblyDW]
+    [fa.rearRightLockCmd.deployedTo = ha.ct.logicalBCMRearRightPassMotorAssemblyDW]
+    [fa.rearLeftLockCmd.deployedTo = ha.ct.logicalBCMRearLeftPassMotorAssemblyDW]
+
+    [fa.gearPostion.deployedTo = ha.ct.logicalHighSpeedBus]
+
+    [fa.SpeedSmartLockFA => (fa.SpeedSmartLockFA.speed.deployedTo in (ha.ct.logicalHighSpeedBus))]
+
+    [fa.DoorLockButtonFA.IndividualLockSwitchFA => (fa.DoorLockButtonFA.IndividualLockSwitchFA.driverDoorLockReq.deployedTo = ha.ct.logicalBCMDriverLockPowerSwitchDW)]
+    [fa.DoorLockButtonFA.IndividualLockSwitchFA => (fa.DoorLockButtonFA.IndividualLockSwitchFA.passDoorLockReq.deployedTo = ha.ct.logicalBCMPassLockPowerSwitchDW)]
+    [fa.DoorLockButtonFA.CentralLockSwitchFA => (fa.DoorLockButtonFA.CentralLockSwitchFA.centralDoorLockReq.deployedTo = ha.ct.logicalBCMCenterLockPowerSwitchDW)]
+
+    [fa.RemoteKeyAccessFA => (no fa.RemoteKeyAccessFA.centralAntennaSignal.deployedTo)]
+    [fa.RemoteKeyAccessFA => (fa.RemoteKeyAccessFA.centralReceiverMsg.deployedTo in (ha.ct.logicalLowSpeedBus))]
+    [fa.RemoteKeyAccessFA => (fa.RemoteKeyAccessFA.authenticationMsg.deployedTo in (ha.ct.logicalLowSpeedBus))]
+
+    [fa.PassiveKeyEntryFA => fa.PassiveKeyEntryFA.driverTransMsg.deployedTo in (ha.ct.logicalTransmitterDriverCapacitiveSensorModule, ha.ct.logicalTransmitterDriverButtonSensorModule, ha.ct.logicalBCMDriverCapacitiveSensorModule, ha.ct.logicalBCMDriverButtonSensorModule)]
+    [fa.PassiveKeyEntryFA => fa.PassiveKeyEntryFA.driverPKEReq.deployedTo in (ha.ct.logicalPKEModuleTransmitter, ha.ct.logicalLowSpeedBus)]
+    [fa.PassiveKeyEntryFA => fa.PassiveKeyEntryFA.passTransMsg.deployedTo in (ha.ct.logicalTransmitterPassCapacitiveSensorModule, ha.ct.logicalTransmitterPassButtonSensorModule, ha.ct.logicalBCMPassCapacitiveSensorModule, ha.ct.logicalBCMPassButtonSensorModule)]
+    [fa.PassiveKeyEntryFA => fa.PassiveKeyEntryFA.passPKEReq.deployedTo in (ha.ct.logicalPKEModuleTransmitter, ha.ct.logicalLowSpeedBus)]
+    [fa.PassiveKeyEntryFA => fa.PassiveKeyEntryFA.insideFrontTransMsg.deployedTo in (ha.ct.logicalTransmitterInsideFrontAntenna, ha.ct.logicalBCMInsideFrontAntenna)]
+    [fa.PassiveKeyEntryFA => fa.PassiveKeyEntryFA.insideCenterTransMsg.deployedTo in (ha.ct.logicalTransmitterInsideCenterAntenna, ha.ct.logicalBCMInsideCenterAntenna)]
+    [fa.PassiveKeyEntryFA => fa.PassiveKeyEntryFA.insideRearTransMsg.deployedTo in (ha.ct.logicalTransmitterInsideRearAntenna, ha.ct.logicalBCMInsideRearAntenna)]
+    [fa.PassiveKeyEntryFA => fa.PassiveKeyEntryFA.insidePKEReq.deployedTo in (ha.ct.logicalPKEModuleTransmitter, ha.ct.logicalLowSpeedBus)]
+    [fa.PassiveKeyEntryFA => fa.PassiveKeyEntryFA.driverDoorHandleReq.deployedTo in (ha.ct.logicalPKEModuleDriverButtonSensorModule, ha.ct.logicalPKEModuleDriverCapacitiveSensorModule, ha.ct.logicalBCMDriverButtonSensorModule, ha.ct.logicalBCMDriverCapacitiveSensorModule)]
+    [fa.PassiveKeyEntryFA => fa.PassiveKeyEntryFA.passDoorHandleReq.deployedTo in (ha.ct.logicalPKEModulePassButtonSensorModule, ha.ct.logicalPKEModulePassCapacitiveSensorModule, ha.ct.logicalBCMPassButtonSensorModule, ha.ct.logicalBCMPassCapacitiveSensorModule)]
+    [fa.PassiveKeyEntryFA => fa.PassiveKeyEntryFA.doorLockControlReq.deployedTo in (ha.ct.logicalLowSpeedBus)]
+
+
+//-------------------- Door Lock System Model ----------------------------//
+DoorLockSys : System
+    DLockFM : FeatureModel
+        Basic : Feature
+            IndividualLockSwitch : Feature ? // This feature is to determine if the driver and passenger should have individual door lock switches or use a central lock switch.
+            SpeedSmartLock : Feature ? // This feature is if the door should lock when the car is above a certain speed.
+        RKA : Feature ? // Remote Key Access
+        PKE : Feature ? // Passive Key Entry
+            xor OutsideDoorHandleSensor
+                ButtonSensor : Feature
+                CapacitiveSensor : Feature
+        [PKE => RKA]
+    DLockFA : DoorLockFA
+        [DoorLockButtonFA.IndividualLockSwitchFA <=> DLockFM.Basic.IndividualLockSwitch]
+        [SpeedSmartLockFA <=> DLockFM.Basic.SpeedSmartLock]
+        [RemoteKeyAccessFA <=> DLockFM.RKA]
+        [PassiveKeyEntryFA <=> DLockFM.PKE]
+        [PassiveKeyEntryFA.OutsideDoorHandleSensor.ButtonSensor <=> DLockFM.PKE.OutsideDoorHandleSensor.ButtonSensor]
+        [PassiveKeyEntryFA.OutsideDoorHandleSensor.CapacitiveSensor <=> DLockFM.PKE.OutsideDoorHandleSensor.CapacitiveSensor]
+
+        // Timing Chains
+        DriverSwitchToControl -> integer
+            [if (DLockFM.Basic.IndividualLockSwitch) then (
+                this = DoorLockButtonFA.IndividualLockSwitchFA.DriverDoorLockButton.latency + 
+                DoorLockButtonFA.IndividualLockSwitchFA.driverDoorLockReq.latency/1000
+            ) else (
+                this = DoorLockButtonFA.CentralLockSwitchFA.CentralLockButton.latency + 
+                DoorLockButtonFA.CentralLockSwitchFA.centralDoorLockReq.latency/1000
+            )]
+        DriverContactToControl -> integer = DriverDoorContact.latency + driverContactSignal.latency/1000
+        DriverLockSensorToControl -> integer = DriverDoorLockSensor.latency + driverLockPosition.latency/1000
+
+        DriverSwitchToMotor -> integer
+            [if (DLockFM.Basic.IndividualLockSwitch) then (
+                this = DoorLockButtonFA.IndividualLockSwitchFA.DriverDoorLockButton.latency + 
+                DoorLockControl.latency + 
+                DriverDoorLockMotor.latency +
+                ((driverLockCmd.latency + DoorLockButtonFA.IndividualLockSwitchFA.driverDoorLockReq.latency)/1000)
+            ) else (
+                this = DoorLockButtonFA.CentralLockSwitchFA.CentralLockButton.latency + 
+                DoorLockControl.latency + 
+                DriverDoorLockMotor.latency +
+                ((DoorLockButtonFA.CentralLockSwitchFA.centralDoorLockReq.latency + driverLockCmd.latency)/1000)
+            )]
+
+        ControlInputDifference -> integer
+        [ControlInputDifference = (max(DriverSwitchToControl.dref, DriverContactToControl.dref, DriverLockSensorToControl.dref) 
+            - min(DriverSwitchToControl.dref, DriverContactToControl.dref, DriverLockSensorToControl.dref))]
+
+        PassiveKeyCapacitiveSensorToMotor -> integer ?
+        [if (DLockFM.PKE.OutsideDoorHandleSensor.CapacitiveSensor) then (
+            PassiveKeyCapacitiveSensorToMotor = PassiveKeyEntryFA.OutsideDoorHandleSensor.CapacitiveSensor.DriverDoorCapacitiveSensor.latency + 
+            PassiveKeyEntryFA.PKEControl.latency + 
+            PassiveKeyEntryFA.DriverLFTransmitter.latency + 
+            PassiveKeyEntryFA.DriverOutsideLFAntenna.latency + 50 + 
+            RemoteKeyAccessFA.CentralRFAntenna.latency + 
+            RemoteKeyAccessFA.CentralRFReceiver.latency + 
+            RemoteKeyAccessFA.IDAuthentication.latency + 
+            DoorLockControl.latency + 
+            DriverDoorLockMotor.latency +
+            ((PassiveKeyEntryFA.driverDoorHandleReq.latency + PassiveKeyEntryFA.driverPKEReq.latency + PassiveKeyEntryFA.driverTransMsg.latency +
+                RemoteKeyAccessFA.centralAntennaSignal.latency + RemoteKeyAccessFA.centralReceiverMsg.latency +
+                RemoteKeyAccessFA.authenticationMsg.latency + driverLockCmd.latency)/1000))
+        else (no PassiveKeyCapacitiveSensorToMotor)]
+
+        // Timing Constraints
+        // Driver lock switch to driver motor timing constraint
+        [(DLockFM.Basic.IndividualLockSwitch && DoorLockRequirements.TimingRequirements.BasicIndividualSwitchLatency) => (
+            DriverSwitchToMotor <= DoorLockRequirements.TimingRequirements.BasicIndividualSwitchLatency
+        )]
+        // Central lock switch to driver motor timing constraint
+        [(no DLockFM.Basic.IndividualLockSwitch && DoorLockRequirements.TimingRequirements.BasicCentralSwitchLatency)=> (
+            DriverSwitchToMotor <= DoorLockRequirements.TimingRequirements.BasicCentralSwitchLatency
+        )]
+        // Switch Unlock Input Synchronization Timing Constraint
+        [DoorLockRequirements.TimingRequirements.SwitchUnlockInputSynchLatency => (
+             ControlInputDifference <= DoorLockRequirements.TimingRequirements.SwitchUnlockInputSynchLatency
+        )]
+        // Passive Key Capacitive Sensor to Motor Timing Constraint
+        [(DoorLockRequirements.TimingRequirements.PKELatency && DLockFM.PKE.OutsideDoorHandleSensor.CapacitiveSensor) => (
+            PassiveKeyCapacitiveSensorToMotor <= DoorLockRequirements.TimingRequirements.PKELatency
+        )]
+
+        // Timing Margins
+        BasicIndividualSwitchLatencyMargin -> integer ?
+        [if DoorLockRequirements.TimingRequirements.BasicIndividualSwitchLatency then (BasicIndividualSwitchLatencyMargin = (DoorLockRequirements.TimingRequirements.BasicIndividualSwitchLatency - DriverSwitchToMotor))
+            else (no BasicIndividualSwitchLatencyMargin)]
+        BasicCentralSwitchLatencyMargin -> integer ?
+        [if DoorLockRequirements.TimingRequirements.SwitchUnlockInputSynchLatency then (BasicCentralSwitchLatencyMargin = (DoorLockRequirements.TimingRequirements.SwitchUnlockInputSynchLatency - DriverSwitchToMotor))
+            else (no BasicCentralSwitchLatencyMargin)]
+        SwitchUnlockInputSynchLatencyMargin -> integer ?
+        [if DoorLockRequirements.TimingRequirements.SwitchUnlockInputSynchLatency then (
+            SwitchUnlockInputSynchLatencyMargin = (DoorLockRequirements.TimingRequirements.SwitchUnlockInputSynchLatency - ControlInputDifference)) 
+            else (no SwitchUnlockInputSynchLatencyMargin)]
+        PKELatencyMargin -> integer ?
+        [if DoorLockRequirements.TimingRequirements.PKELatency then (PKELatencyMargin = (DoorLockRequirements.TimingRequirements.PKELatency - PassiveKeyCapacitiveSensorToMotor))
+            else (no PKELatencyMargin)]
+        
+    DLockHA : DoorLockHA
+        DLockDN : DoorLockDN
+            [BCM = Car.BCM]
+            [TCM = Car.TCM]
+            [EC = Car.EC]
+            [CombinationMeter => CombinationMeter = Car.CombinationMeter]
+            [DoorLockButtonDN.IndividualLockSwitchDN <=> DLockFM.Basic.IndividualLockSwitch]
+            [CombinationMeter <=> DLockFM.Basic.SpeedSmartLock]
+            [RemoteKeyAccessDN <=> DLockFM.RKA]
+            [PassiveKeyEntryDN <=> DLockFM.PKE]
+            [PassiveKeyEntryDN.OutsideDoorHandleSensor.ButtonSensor <=> DLockFM.PKE.OutsideDoorHandleSensor.ButtonSensor]
+            [PassiveKeyEntryDN.OutsideDoorHandleSensor.CapacitiveSensor <=> DLockFM.PKE.OutsideDoorHandleSensor.CapacitiveSensor]
+        DLockPT : DoorLockPT
+            [dn = DLockDN]
+        DLockCT : DoorLockCT
+            [dn = DLockDN]
+        [dn = DLockDN]
+        [pt = DLockPT]
+        [ct = DLockCT]
+    DLockDpl : DoorLockDpl
+        [fa = DLockFA]
+        [ha = DLockHA]
+        [DLockFM.PKE <=> PassiveKeyEntryDpl]
+
+DoorLockRequirements
+    TimingRequirements
+        BasicIndividualSwitchLatency -> integer ?
+        BasicCentralSwitchLatency -> integer ?
+        SwitchUnlockInputSynchLatency -> integer ?
+        PKELatency -> integer ?
+
+Car
+    BCM : DeviceNode
+        [type = SmartDeviceNode]
+        [mass = 408]
+        [cost = 261]
+        [ppm = 50]
+        [replaceCost = 261]
+        [speedFactor = 10]
+    TCM : DeviceNode
+        [type = SmartDeviceNode]
+        [mass = 204]
+        [cost = 117]
+        [ppm = 50]
+        [replaceCost = 117]
+        [speedFactor = 10]
+    CombinationMeter : DeviceNode ?
+        [type = SmartDeviceNode]
+        [mass = 198]
+        [cost = 649]
+        [ppm = 50]
+        [replaceCost = 649]
+        [speedFactor = 10]
+    EC : DeviceNode
+        [type = PowerDeviceNode]
+        [mass = 0]
+        [cost = 0]
+        [ppm = 10]
+        [replaceCost = 0]
+
+totalCarMass -> integer = sum(DeviceNode.mass) + sum(HardwareConnector.mass)/1000
+totalCarCost -> integer = sum(DeviceNode.cost) + sum(HardwareDataConnector.cost)/1000
+totalCarWarrantyCost -> integer = sum(DeviceNode.warrantyCost)/1000
+
+// Optimization Goals:
+// Comment out these goals if optimization should not be perfromed (no other modifications are necessary)
+// << minimize totalCarMass >>
+// << minimize totalCarCost >>
+// << minimize totalCarWarrantyCost >>
+
+
+
+

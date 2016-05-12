@@ -1,0 +1,428 @@
+/*************** Reference_Model ***************/ 
+
+abstract System 
+  cost -> integer 
+  mass -> integer 
+  warrantyCost -> integer 
+abstract FeatureModel 
+abstract Architecture 
+abstract FunctionalAnalysis 
+abstract HardwareArchitecture 
+  totalMass -> integer 
+  totalCost -> integer 
+  totalWarrantyCost -> integer 
+abstract DeviceNodeClassification 
+  totalCost -> integer 
+  totalMass -> integer 
+  totalWarrantyCost -> integer 
+abstract CommTopology 
+  totalMass -> integer 
+  totalCost -> integer 
+abstract PowerTopology 
+  totalMass -> integer 
+  totalCost -> integer 
+abstract Deployment 
+
+abstract Feature 
+
+abstract FunctionalAnalysisComponent 
+  deployedTo -> DeviceNode 
+  xor implementation 
+    hardware 
+      [deployedTo.type in (EEDeviceNode , SmartDeviceNode)]
+    software 
+      [deployedTo.type in SmartDeviceNode]
+
+
+abstract AnalysisFunction : FunctionalAnalysisComponent 
+  [deployedTo.type in SmartDeviceNode]
+  latency -> integer 
+  baseLatency -> integer 
+
+abstract FunctionalDevice : FunctionalAnalysisComponent 
+  [deployedTo.type in (SmartDeviceNode , EEDeviceNode)]
+  latency -> integer 
+
+abstract FunctionConnector 
+  sender -> FunctionalAnalysisComponent 
+  receiver -> FunctionalAnalysisComponent 
+  deployedTo -> HardwareDataConnector ? 
+    [this.parent in this.deployedFrom]
+    [(sender.deployedTo.dref , receiver.deployedTo.dref) in (deployedTo.endpoint.dref)]
+  [(sender.deployedTo.dref = receiver.deployedTo.dref) <=> no(this.deployedTo)]
+
+
+  messageSize -> integer 
+  latency -> integer 
+enum DeviceNodeType = SmartDeviceNode | EEDeviceNode | PowerDeviceNode
+abstract DeviceNode 
+  type -> DeviceNodeType 
+  mass -> integer 
+  cost -> integer 
+  warrantyCost -> integer 
+  replaceCost -> integer 
+  ppm -> integer 
+  speedFactor -> integer 
+
+abstract HardwareConnector 
+  mass -> integer 
+  cost -> integer 
+  length -> integer 
+
+abstract PowerConnector : HardwareConnector 
+  source -> DeviceNode 
+  sink -> DeviceNode 
+
+abstract LoadPowerConnector : PowerConnector 
+abstract DevicePowerConnector : PowerConnector 
+
+abstract HardwareDataConnector : HardwareConnector 
+  endpoint -> DeviceNode 2..* 
+  deployedFrom -> FunctionConnector 1..* 
+    [this.deployedTo = this.parent]
+  transferTimePerSize -> integer 
+
+abstract DiscreteDataConnector : HardwareDataConnector 
+abstract AnalogDataConnector : HardwareDataConnector 
+
+abstract BusConnector : HardwareDataConnector 
+  [all e : endpoint | e.type = SmartDeviceNode]
+  xor type 
+    LowSpeedCAN 
+    HighSpeedCAN 
+    LIN 
+    FlexRay 
+
+abstract LogicalBusBridge : HardwareDataConnector 
+  bus -> BusConnector 2..2 
+  [all e : this.endpoint | e.type = SmartDeviceNode]
+
+// Automotive Concepts [TODO] 
+abstract ECU : DeviceNode 
+abstract Switch : DeviceNode 
+abstract Motor : DeviceNode 
+abstract Inline : DeviceNode 
+  abstract Pin : DeviceNode 
+// End Automotive Concepts 
+
+/*************** End Reference_Model ***************/ 
+
+/*************** DriverWinSys ***************/ 
+
+DriverWinSys : System 
+  [this.cost = this.DWinSysArch.DWinSysHA.totalCost]
+  [this.mass = this.DWinSysArch.DWinSysHA.totalMass]
+  [this.warrantyCost = this.DWinSysArch.DWinSysHA.totalWarrantyCost]
+  DWinSysFM : DriverWinSysFM 
+  DWinSysArch : Architecture 
+    DWinSysFA : DriverWinSysFAA 
+    DWinSysHA : DriverWinSysHA 
+    DWinSysDpl : Deployment 
+      fa -> DWinSysFA 
+      ha -> DWinSysHA 
+      [DWinSysDpl.fa.WinSwitch.deployedTo.dref in (DWinSysDpl.ha.DriverWinSysDN.Switch)]
+      [DWinSysDpl.fa.WinArbiter.deployedTo.dref in (DWinSysDpl.ha.dn.Switch , DWinSysDpl.ha.dn.Motor , DWinSysDpl.ha.dn.BCM.dref , DWinSysDpl.ha.dn.DoorModule)]
+      [DWinSysDpl.fa.WinControl.deployedTo.dref in (DWinSysDpl.ha.dn.Switch , DWinSysDpl.ha.dn.Motor , DWinSysDpl.ha.dn.BCM.dref , DWinSysDpl.ha.dn.DoorModule)]
+      [DWinSysDpl.fa.CurrentSensor.deployedTo.dref in (DWinSysDpl.ha.dn.Motor)]
+      [DWinSysDpl.fa.WinMotor.deployedTo.dref in (DWinSysDpl.ha.dn.Motor)]
+
+      PinchDetectionDpl : Deployment ? 
+        [DWinSysDpl.fa.PinchDetectionFA.PinchDetection.deployedTo.dref in (DWinSysDpl.ha.dn.Switch , DWinSysDpl.ha.dn.Motor , DWinSysDpl.ha.dn.BCM.dref , DWinSysDpl.ha.dn.DoorModule)]
+        [DWinSysDpl.fa.PinchDetectionFA.PositionSensor.deployedTo.dref in (DWinSysDpl.ha.dn.Motor)]
+      [PinchDetectionDpl <=> DWinSysFM.expressDown.expressUp]
+
+      // Now the set of constraints to configure the LP topology based on WinControl deployment 
+      [(this.fa.WinControl.deployedTo.dref = this.ha.dn.Switch) <=> this.ha.pt.LoadPowerPT.SwitchIsDriver]
+      [(this.fa.WinControl.deployedTo.dref = this.ha.dn.Motor) <=> this.ha.pt.LoadPowerPT.MotorIsDriver]
+      [(this.fa.WinControl.deployedTo.dref = this.ha.dn.DoorModule) <=> this.ha.pt.LoadPowerPT.DoorModuleIsDriver]
+      [(this.fa.WinControl.deployedTo.dref = this.ha.dn.BCM.dref) <=> this.ha.pt.LoadPowerPT.BCMIsDriver]
+
+/*************** End DriverWinSys ***************/ 
+
+/*************** Car ***************/ 
+
+Car : System 
+  [this.cost = CarHA.totalCost]
+  [this.mass = CarHA.totalMass]
+  [this.warrantyCost = CarHA.totalWarrantyCost]
+  CarArchitecture : Architecture 
+    CarHA : HardwareArchitecture 
+      [this.totalCost = CarDN.totalCost]
+      [this.totalMass = CarDN.totalMass]
+      [this.totalWarrantyCost = CarDN.totalWarrantyCost]
+      CarDN : DeviceNodeClassification 
+        [this.totalCost = BCM.cost + ElectricCenter.cost]
+        [this.totalMass = ElectricCenter.mass]
+        [this.totalWarrantyCost = BCM.warrantyCost + ElectricCenter.warrantyCost]
+        BCM : DeviceNode ? 
+          [this.mass = 408]
+          [this.cost = 460]
+          [this.replaceCost = 460]
+          [this.ppm = 50]
+          [this.warrantyCost = this.replaceCost * this.ppm]
+          [this.speedFactor = 50]
+          [this.type in (SmartDeviceNode)]
+        ElectricCenter : DeviceNode 
+          [this.mass = 0]
+          [this.cost = 0]
+          [this.replaceCost = 0]
+          [this.ppm = 10]
+          [this.warrantyCost = this.replaceCost * this.ppm]
+          [this.speedFactor = 0]
+          [this.type in (PowerDeviceNode)]
+
+/*************** End Car ***************/ 
+
+/*************** DriverWinSysHA ***************/ 
+
+abstract DriverWinSysHA : HardwareArchitecture 
+  [this.totalCost = DriverWinSysDN.totalCost + DriverWinSysPT.totalCost + DriverWinSysCT.totalCost]
+  [this.totalMass = DriverWinSysDN.totalMass + DriverWinSysPT.totalMass + DriverWinSysCT.totalMass]
+  [this.totalWarrantyCost = DriverWinSysDN.totalWarrantyCost]
+  dn -> DriverWinSysDN 
+  pt -> DriverWinSysPT 
+  ct -> DriverWinSysCT 
+  DriverWinSysDN : DeviceNodeClassification 
+    [this.totalCost = Switch.cost + Motor.cost + DoorInline.cost + DoorModule.cost]
+    [this.totalMass = Switch.mass + Motor.mass + DoorInline.mass + DoorModule.mass]
+    [this.totalWarrantyCost = Switch.warrantyCost + Motor.warrantyCost + DoorInline.warrantyCost + DoorModule.warrantyCost]
+    Switch : DeviceNode 
+      [this.mass = 173]
+      [this.cost = 110]
+      [this.replaceCost = 110]
+      [this.ppm = (if (this.type in SmartDeviceNode) then (50) else (10))]
+      [this.warrantyCost = this.replaceCost * this.ppm]
+      [this.speedFactor = (if (this.type in SmartDeviceNode) then (10) else (0))]
+      [this.type in (SmartDeviceNode , EEDeviceNode)]
+    Motor : DeviceNode 
+      [this.mass = 453]
+      [this.cost = (if (this.type in SmartDeviceNode) then (107) else (122))]
+      [this.replaceCost = (if (this.type in SmartDeviceNode) then (107) else (122))]
+      [this.ppm = (if (this.type in SmartDeviceNode) then (50) else (20))]
+      [this.warrantyCost = this.replaceCost * this.ppm]
+      [this.speedFactor = (if (this.type in SmartDeviceNode) then (10) else (0))]
+      [this.type in (SmartDeviceNode , EEDeviceNode)]
+    DoorInline : DeviceNode 
+      [this.mass = 10]
+      [this.cost = 4]
+      [this.replaceCost = 2]
+      [this.ppm = 1]
+      [this.warrantyCost = this.replaceCost * this.ppm]
+      [this.speedFactor = 0]
+      [this.type in (PowerDeviceNode)]
+    DoorModule : DeviceNode ? 
+      [this.mass = 368]
+      [this.cost = 300]
+      [this.replaceCost = 300]
+      [this.ppm = 50]
+      [this.warrantyCost = this.replaceCost * this.ppm]
+      [this.speedFactor = 10]
+      [this.type in (SmartDeviceNode)]
+    BCM -> DeviceNode ? 
+    [this.BCM = Car.CarArchitecture.CarHA.CarDN.BCM]
+    EC -> DeviceNode 
+    [this.EC = Car.CarArchitecture.CarHA.CarDN.ElectricCenter]
+
+  DriverWinSysCT : CommTopology 
+    [this.totalCost = (this.localLowSpeedBus.cost + this.switchMotorDisc.cost + this.switchBCMDisc.cost + this.switchDoorModuleDisc.cost + this.motorBCMDisc.cost + this.motorDoorModuleDisc.cost) / 1000]
+    [this.totalMass = (this.localLowSpeedBus.mass + this.switchMotorDisc.mass + this.switchBCMDisc.mass + this.switchDoorModuleDisc.mass + this.motorBCMDisc.mass + this.motorDoorModuleDisc.mass) / 1000]
+    dn -> DriverWinSysDN 
+    switchMotorDisc : DiscreteDataConnector ? 
+      [this.length = 40]
+      [this.mass = 110 * this.length * #(this.deployedFrom)]
+      [this.cost = 13 * this.length * #(this.deployedFrom)]
+      [this.transferTimePerSize = 0]
+      [this.endpoint = (DriverWinSysCT.dn.Motor , DriverWinSysCT.dn.Switch)]
+    switchBCMDisc : DiscreteDataConnector ? 
+      [this.length = 85]
+      [this.mass = 110 * this.length * #(this.deployedFrom)]
+      [this.cost = 13 * this.length * #(this.deployedFrom)]
+      [this.transferTimePerSize = 0]
+      [this.endpoint = (DriverWinSysCT.dn.Switch , DriverWinSysCT.dn.BCM.dref)]
+    switchDoorModuleDisc : DiscreteDataConnector ? 
+      [this.length = 25]
+      [this.mass = 110 * this.length * #(this.deployedFrom)]
+      [this.cost = 13 * this.length * #(this.deployedFrom)]
+      [this.transferTimePerSize = 0]
+      [this.endpoint = (DriverWinSysCT.dn.Switch , DriverWinSysCT.dn.DoorModule)]
+    motorBCMDisc : DiscreteDataConnector ? 
+      [this.length = 85]
+      [this.mass = 110 * this.length * #(this.deployedFrom)]
+      [this.cost = 13 * this.length * #(this.deployedFrom)]
+      [this.transferTimePerSize = 0]
+      [this.endpoint = (DriverWinSysCT.dn.Motor , DriverWinSysCT.dn.BCM.dref)]
+    motorDoorModuleDisc : DiscreteDataConnector ? 
+      [this.length = 35]
+      [this.mass = 110 * this.length * #(this.deployedFrom)]
+      [this.cost = 13 * this.length * #(this.deployedFrom)]
+      [this.transferTimePerSize = 0]
+      [this.endpoint = (DriverWinSysCT.dn.Motor , DriverWinSysCT.dn.DoorModule)]
+    localLowSpeedBus : BusConnector ? 
+      [this.length = 70]
+      [this.mass = (if (this.type.LIN) then (20 * this.length) else (20 * this.length))]
+      [this.cost = (if (this.type.LIN) then (26 * this.length) else (52 * this.length))]
+      [this.transferTimePerSize = (if (this.type.LIN) then (400) else (64))]
+      [this.endpoint in (DriverWinSysCT.dn.BCM.dref , DriverWinSysCT.dn.DoorModule , DriverWinSysCT.dn.Switch , DriverWinSysCT.dn.Motor)]
+      [this.type.LIN || this.type.LowSpeedCAN]
+  DriverWinSysPT : PowerTopology 
+    [this.totalCost = (this.switchInlineDP.cost + this.motorInlineDP.cost + this.doorModuleInlineDP.cost + this.inlineECDP.cost + this.LoadPowerPT.totalCost) / 1000]
+    [this.totalMass = (this.switchInlineDP.mass + this.motorInlineDP.mass + this.doorModuleInlineDP.mass + this.inlineECDP.mass + this.LoadPowerPT.totalMass) / 1000]
+    dn -> DriverWinSysDN 
+    motorInlineDP : DevicePowerConnector ? 
+      [this.length = 45]
+      [this.mass = 104 * this.length]
+      [this.cost = 9 * this.length]
+      [this.source = DriverWinSysPT.dn.DoorInline && this.sink = DriverWinSysPT.dn.Switch]
+    switchInlineDP : DevicePowerConnector ? 
+      [this.length = 45]
+      [this.mass = 104 * this.length]
+      [this.cost = 9 * this.length]
+      [this.source = DriverWinSysPT.dn.DoorInline && this.sink = DriverWinSysPT.dn.Switch]
+    doorModuleInlineDP : DevicePowerConnector ? 
+      [this.length = 35]
+      [this.mass = 104 * this.length]
+      [this.cost = 9 * this.length]
+      [this.source = DriverWinSysPT.dn.DoorInline && this.sink = DriverWinSysPT.dn.DoorModule]
+    inlineECDP : DevicePowerConnector ? 
+      [this.length = 40]
+      [this.mass = 104 * this.length]
+      [this.cost = 9 * this.length]
+      [this.source = DriverWinSysPT.dn.EC.dref && this.sink = DriverWinSysPT.dn.DoorInline]
+    [motorInlineDP <=> this.dn.Motor.type in SmartDeviceNode]
+    [switchInlineDP <=> this.dn.Switch.type in SmartDeviceNode]
+    [doorModuleInlineDP <=> some(this.dn.DoorModule)]
+    [inlineECDP <=> some(motorInlineDP , switchInlineDP , doorModuleInlineDP)]
+    xor LoadPowerPT : PowerTopology 
+      [this.totalCost = this.MotorIsDriver.totalCost + this.SwitchIsDriver.totalCost + this.DoorModuleIsDriver.totalCost + this.BCMIsDriver.totalCost]
+      [this.totalMass = this.MotorIsDriver.totalMass + this.SwitchIsDriver.totalMass + this.DoorModuleIsDriver.totalMass + this.BCMIsDriver.totalMass]
+      MotorIsDriver : PowerTopology 
+        [this.totalCost = this.motorLP.cost + this.inlineLP.cost]
+        [this.totalMass = this.motorLP.mass + this.inlineLP.mass]
+        motorLP : LoadPowerConnector 
+          [this.length = 45]
+          [this.mass = 185 * this.length]
+          [this.cost = 9 * this.length]
+          [this.source = DriverWinSysPT.dn.DoorInline && this.sink = DriverWinSysPT.dn.Motor]
+        inlineLP : LoadPowerConnector 
+          [this.length = 40]
+          [this.mass = 185 * this.length]
+          [this.cost = 9 * this.length]
+          [this.source = DriverWinSysPT.dn.EC.dref && this.sink = DriverWinSysPT.dn.DoorInline]
+      SwitchIsDriver : PowerTopology 
+        [this.totalCost = this.motorLP.cost + this.inlineLP.cost + this.switchLP.cost]
+        [this.totalMass = this.motorLP.mass + this.inlineLP.mass + this.switchLP.mass]
+        motorLP : LoadPowerConnector 
+          [this.length = 40]
+          [this.mass = 185 * this.length]
+          [this.cost = 9 * this.length]
+          [this.source = DriverWinSysPT.dn.Switch && this.sink = DriverWinSysPT.dn.Motor]
+        switchLP : LoadPowerConnector 
+          [this.length = 45]
+          [this.mass = 185 * this.length]
+          [this.cost = 9 * this.length]
+          [this.source = DriverWinSysPT.dn.DoorInline && this.sink = DriverWinSysPT.dn.Switch]
+        inlineLP : LoadPowerConnector 
+          [this.length = 40]
+          [this.mass = 185 * this.length]
+          [this.cost = 9 * this.length]
+          [this.source = DriverWinSysPT.dn.EC.dref && this.sink = DriverWinSysPT.dn.DoorInline]
+      DoorModuleIsDriver : PowerTopology 
+        [this.totalCost = this.motorLP.cost + this.inlineLP.cost + this.doorModuleLP.cost]
+        [this.totalMass = this.motorLP.mass + this.inlineLP.mass + this.doorModuleLP.mass]
+        motorLP : LoadPowerConnector 
+          [this.length = 30]
+          [this.mass = 185 * this.length]
+          [this.cost = 9 * this.length]
+          [this.source = DriverWinSysPT.dn.DoorModule && this.sink = DriverWinSysPT.dn.Motor]
+        doorModuleLP : LoadPowerConnector 
+          [this.length = 35]
+          [this.mass = 185 * this.length]
+          [this.cost = 9 * this.length]
+          [this.source = DriverWinSysPT.dn.DoorInline && this.sink = DriverWinSysPT.dn.DoorModule]
+        inlineLP : LoadPowerConnector 
+          [this.length = 40]
+          [this.mass = 185 * this.length]
+          [this.cost = 9 * this.length]
+          [this.source = DriverWinSysPT.dn.EC.dref && this.sink = DriverWinSysPT.dn.DoorInline]
+      BCMIsDriver : PowerTopology 
+        [this.totalCost = this.motorLP.cost + this.inlineLP.cost]
+        [this.totalMass = this.motorLP.mass + this.inlineLP.mass]
+        motorLP : LoadPowerConnector 
+          [this.length = 45]
+          [this.mass = 185 * this.length]
+          [this.cost = 9 * this.length]
+          [this.source = DriverWinSysPT.dn.DoorInline && this.sink = DriverWinSysPT.dn.Motor]
+        inlineLP : LoadPowerConnector 
+          [this.length = 40]
+          [this.mass = 185 * this.length]
+          [this.cost = 9 * this.length]
+          [this.source = DriverWinSysPT.dn.BCM.dref && this.sink = DriverWinSysPT.dn.DoorInline]
+
+/*************** End DriverWinSysHA ***************/ 
+
+/*************** DriverWinSysFAA ***************/ 
+
+abstract DriverWinSysFAA : FunctionalAnalysis 
+  WinSwitch : FunctionalDevice 
+    [this.latency = 20]
+    [this.implementation.hardware]
+  WinArbiter : AnalysisFunction 
+    [this.baseLatency = 1]
+    [this.latency = this.baseLatency * this.deployedTo.dref.speedFactor]
+    [this.implementation.hardware || this.implementation.software]
+  WinControl : AnalysisFunction 
+    [this.baseLatency = 2]
+    [this.latency = this.baseLatency * this.deployedTo.dref.speedFactor]
+    [this.implementation.software]
+  WinMotor : FunctionalDevice 
+    [this.latency = 10]
+    [this.implementation.hardware]
+  CurrentSensor : FunctionalDevice 
+    [this.latency = 5]
+    [this.implementation.hardware]
+  localWinReq : FunctionConnector 
+    [this.messageSize = 1]
+    [this.latency = (if (some(this.deployedTo.dref)) then (this.messageSize * this.deployedTo.dref.transferTimePerSize) else (0))]
+    [this.sender = WinSwitch && this.receiver = WinArbiter]
+  winReq : FunctionConnector 
+    [this.messageSize = 1]
+    [this.latency = (if (some(this.deployedTo.dref)) then (this.messageSize * this.deployedTo.dref.transferTimePerSize) else (0))]
+    [this.sender = WinArbiter && this.receiver = WinControl]
+  winCmd : FunctionConnector 
+    [this.messageSize = 2]
+    [this.latency = (if (some(this.deployedTo.dref)) then (this.messageSize * this.deployedTo.dref.transferTimePerSize) else (0))]
+    [this.sender = WinControl && this.receiver = WinMotor]
+  current : FunctionConnector 
+    [this.messageSize = 1]
+    [this.latency = (if (some(this.deployedTo.dref)) then (this.messageSize * this.deployedTo.dref.transferTimePerSize) else (0))]
+    [this.sender = CurrentSensor && this.receiver = WinControl]
+
+  PinchDetectionFA : FunctionalAnalysis ? 
+    PinchDetection : AnalysisFunction 
+      [this.baseLatency = 2]
+      [this.latency = this.baseLatency * this.deployedTo.dref.speedFactor]
+      [this.implementation.software]
+    PositionSensor : FunctionalDevice 
+      [this.latency = 10]
+      [this.implementation.hardware]
+    position : FunctionConnector 
+      [this.messageSize = 1]
+      [this.latency = (if (some(this.deployedTo.dref)) then (this.messageSize * this.deployedTo.dref.transferTimePerSize) else (0))]
+      [this.sender = PositionSensor && this.receiver = PinchDetection]
+    object : FunctionConnector 
+      [this.messageSize = 2]
+      [this.latency = (if (some(this.deployedTo.dref)) then (this.messageSize * this.deployedTo.dref.transferTimePerSize) else (0))]
+      [this.sender = PinchDetection && this.receiver = WinControl]
+  [PinchDetectionFA <=> DriverWinSysFM.expressDown.expressUp]
+
+/*************** End DriverWinSysFAA ***************/ 
+
+/*************** DriverWinSysFM ***************/ 
+
+abstract DriverWinSysFM : FeatureModel 
+  basic : Feature 
+  expressDown : Feature ? 
+    expressUp : Feature ? 
+
+/*************** End DriverWinSysFM ***************/ 
+

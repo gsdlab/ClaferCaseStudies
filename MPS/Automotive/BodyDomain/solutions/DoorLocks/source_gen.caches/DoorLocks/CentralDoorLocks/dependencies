@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dependenciesRoot>
+  <dependency className="DoorLocks.CentralDoorLocks.BasicCT" file="BasicCT.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.BasicDN" file="BasicDN.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.BasicFAA" file="BasicFAA.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.BasicPT" file="BasicPT.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.Car" file="Car.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.DoorLocksCT" file="DoorLocksCT.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.DoorLocksDN" file="DoorLocksDN.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.DoorLocksFAA" file="DoorLocksFAA.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.DoorLocksFM" file="DoorLocksFM.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.DoorLocksPT" file="DoorLocksPT.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.DoorLocksSys" file="DoorLocksSys.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.PassiveKeyEntryCT" file="PassiveKeyEntryCT.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.PassiveKeyEntryDN" file="PassiveKeyEntryDN.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.PassiveKeyEntryFAA" file="PassiveKeyEntryFAA.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.PassiveKeyEntryPT" file="PassiveKeyEntryPT.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.Reference_Model" file="Reference_Model.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.RemoteKeyAccessDN" file="RemoteKeyAccessDN.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.RemoteKeyAccessFAA" file="RemoteKeyAccessFAA.cfr" />
+  <dependency className="DoorLocks.CentralDoorLocks.RemoteKeyAccessPT" file="RemoteKeyAccessPT.cfr" />
+</dependenciesRoot>
+

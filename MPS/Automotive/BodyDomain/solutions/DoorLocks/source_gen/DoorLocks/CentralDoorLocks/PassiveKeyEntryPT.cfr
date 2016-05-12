@@ -1,0 +1,230 @@
+/*************** Reference_Model ***************/ 
+
+abstract System 
+abstract FeatureModel 
+abstract Architecture 
+abstract FunctionalAnalysis 
+abstract HardwareArchitecture 
+abstract DeviceNodeClassification 
+abstract CommTopology 
+abstract PowerTopology 
+abstract Deployment 
+
+abstract Feature 
+
+abstract FunctionalAnalysisComponent 
+  deployedTo -> DeviceNode 
+  xor implementation 
+    hardware 
+      [deployedTo.type in (EEDeviceNode , SmartDeviceNode)]
+    software 
+      [deployedTo.type in SmartDeviceNode]
+
+
+abstract AnalysisFunction : FunctionalAnalysisComponent 
+  [deployedTo.type in SmartDeviceNode]
+
+abstract FunctionalDevice : FunctionalAnalysisComponent 
+  [deployedTo.type in (SmartDeviceNode , EEDeviceNode)]
+
+abstract FunctionConnector 
+  sender -> FunctionalAnalysisComponent 
+  receiver -> FunctionalAnalysisComponent 
+  deployedTo -> HardwareDataConnector ? 
+    [this.parent in this.deployedFrom]
+    [(sender.deployedTo.dref , receiver.deployedTo.dref) in (deployedTo.endpoint.dref)]
+  [(sender.deployedTo.dref = receiver.deployedTo.dref) <=> no(this.deployedTo)]
+
+
+enum DeviceNodeType = SmartDeviceNode | EEDeviceNode | PowerDeviceNode
+abstract DeviceNode 
+  type -> DeviceNodeType 
+
+abstract HardwareConnector 
+
+abstract PowerConnector : HardwareConnector 
+  source -> DeviceNode 
+  sink -> DeviceNode 
+
+abstract LoadPowerConnector : PowerConnector 
+abstract DevicePowerConnector : PowerConnector 
+
+abstract HardwareDataConnector : HardwareConnector 
+  endpoint -> DeviceNode 2..* 
+  deployedFrom -> FunctionConnector 1..* 
+    [this.deployedTo = this.parent]
+
+abstract DiscreteDataConnector : HardwareDataConnector 
+abstract AnalogDataConnector : HardwareDataConnector 
+
+abstract BusConnector : HardwareDataConnector 
+  [all e : endpoint | e.type = SmartDeviceNode]
+  xor type 
+    LowSpeedCAN 
+    HighSpeedCAN 
+    LIN 
+    FlexRay 
+
+abstract LogicalBusBridge : HardwareDataConnector 
+  bus -> BusConnector 2..2 
+  [all e : this.endpoint | e.type = SmartDeviceNode]
+
+// Automotive Concepts [TODO] 
+abstract ECU : DeviceNode 
+abstract Switch : DeviceNode 
+abstract Motor : DeviceNode 
+abstract Inline : DeviceNode 
+  abstract Pin : DeviceNode 
+// End Automotive Concepts 
+
+/*************** End Reference_Model ***************/ 
+
+/*************** PassiveKeyEntryPT ***************/ 
+
+abstract PassiveKeyEntryPT : PowerTopology 
+  dn -> DoorLocksDN 
+  pkeModuleDP : DevicePowerConnector ? 
+    [this.source = PassiveKeyEntryPT.dn.Basic_DN.EC.dref && this.sink = PassiveKeyEntryPT.dn.PKE_DN.PassiveKeyModule]
+  transmitterDP : DevicePowerConnector ? 
+    [this.source = PassiveKeyEntryPT.dn.Basic_DN.EC.dref && this.sink = PassiveKeyEntryPT.dn.PKE_DN.Transmitter]
+  driverCapacitiveSensorDP : DevicePowerConnector ? 
+    [this.source = PassiveKeyEntryPT.dn.Basic_DN.EC.dref && this.sink = PassiveKeyEntryPT.dn.PKE_DN.OutsideDoorHandleSensorDN.CapacitiveSensorDN.DriverDoorCapacitiveHandleModule]
+  passCapacitiveSensorDP : DevicePowerConnector ? 
+    [this.source = PassiveKeyEntryPT.dn.Basic_DN.EC.dref && this.sink = PassiveKeyEntryPT.dn.PKE_DN.OutsideDoorHandleSensorDN.CapacitiveSensorDN.PassDoorCapacitiveHandleModule]
+
+  [pkeModuleDP <=> PassiveKeyEntryPT.dn.PKE_DN.PassiveKeyModule]
+  [transmitterDP <=> PassiveKeyEntryPT.dn.PKE_DN.Transmitter]
+  [driverCapacitiveSensorDP <=> PassiveKeyEntryPT.dn.PKE_DN.OutsideDoorHandleSensorDN.CapacitiveSensorDN.DriverDoorCapacitiveHandleModule]
+  [passCapacitiveSensorDP <=> PassiveKeyEntryPT.dn.PKE_DN.OutsideDoorHandleSensorDN.CapacitiveSensorDN.PassDoorCapacitiveHandleModule]
+
+/*************** End PassiveKeyEntryPT ***************/ 
+
+/*************** PassiveKeyEntryDN ***************/ 
+
+abstract PassiveKeyEntryDN : DeviceNodeClassification 
+  Transmitter : DeviceNode ? 
+    [this.type in (EEDeviceNode)]
+  PassiveKeyModule : DeviceNode ? 
+    [this.type in (SmartDeviceNode)]
+
+  InsideFrontAntenna : DeviceNode 
+    [this.type in (EEDeviceNode)]
+  InsideCenterAntenna : DeviceNode 
+    [this.type in (EEDeviceNode)]
+  InsideRearAntenna : DeviceNode 
+    [this.type in (EEDeviceNode)]
+
+  xor OutsideDoorHandleSensorDN : DeviceNodeClassification 
+
+    ButtonSensorDN : DeviceNodeClassification 
+      DriverDoorButtonHandleModule : DeviceNode 
+        [this.type in (EEDeviceNode)]
+      PassDoorButtonHandleModule : DeviceNode 
+        [this.type in (EEDeviceNode)]
+    CapacitiveSensorDN : DeviceNodeClassification 
+      DriverDoorCapacitiveHandleModule : DeviceNode 
+        [this.type in (EEDeviceNode)]
+      PassDoorCapacitiveHandleModule : DeviceNode 
+        [this.type in (EEDeviceNode)]
+
+  [OutsideDoorHandleSensorDN.ButtonSensorDN <=> DoorLocksFM.PKE.OutsideDoorHandleSensor.ButtonSensor]
+  [OutsideDoorHandleSensorDN.CapacitiveSensorDN <=> DoorLocksFM.PKE.OutsideDoorHandleSensor.CapacitiveSensor]
+
+/*************** End PassiveKeyEntryDN ***************/ 
+
+/*************** DoorLocksDN ***************/ 
+
+abstract DoorLocksDN : DeviceNodeClassification 
+  Basic_DN : BasicDN 
+  RKA_DN : RemoteKeyAccessDN ? 
+  PKE_DN : PassiveKeyEntryDN ? 
+  [RKA_DN <=> DoorLocksFM.RKA]
+  [PKE_DN <=> DoorLocksFM.PKE]
+
+/*************** End DoorLocksDN ***************/ 
+
+/*************** BasicDN ***************/ 
+
+abstract BasicDN : DeviceNodeClassification 
+
+  DriverDoorLockMotorAssembly : DeviceNode 
+    [this.type in (EEDeviceNode)]
+  PassDoorLockMotorAssembly : DeviceNode 
+    [this.type in (EEDeviceNode)]
+  RearRightPassDoorLockMotorAssembly : DeviceNode 
+    [this.type in (EEDeviceNode)]
+  RearLeftPassDoorLockMotorAssembly : DeviceNode 
+    [this.type in (EEDeviceNode)]
+
+  DoorLockButtonDN : DeviceNodeClassification 
+    IndividualLockSwitchDN : DeviceNodeClassification 
+      DriverLockPowerSwitch : DeviceNode 
+        [this.type in (EEDeviceNode)]
+      PassLockPowerSwitch : DeviceNode 
+        [this.type in (EEDeviceNode)]
+    CentralLockSwitchDN : DeviceNodeClassification 
+      CenterLockPowerSwitch : DeviceNode 
+        [this.type in (EEDeviceNode)]
+
+  BCM -> Car.CarArchitecture.CarHA.CarDN.BCM 
+  TCM -> Car.CarArchitecture.CarHA.CarDN.TCM 
+  EC -> Car.CarArchitecture.CarHA.CarDN.ElectricCenter 
+  CombinationMeter -> Car.CarArchitecture.CarHA.CarDN.CombinationMeter ? 
+
+  [DoorLockButtonDN.IndividualLockSwitchDN <=> DoorLocksFM.Basic.IndividualLockSwitch]
+  [CombinationMeter <=> DoorLocksFM.Basic.SpeedSmartLock]
+
+/*************** End BasicDN ***************/ 
+
+/*************** RemoteKeyAccessDN ***************/ 
+
+abstract RemoteKeyAccessDN : DeviceNodeClassification 
+  CentralRFAntennaModule : DeviceNode 
+    [this.type in (SmartDeviceNode)]
+
+/*************** End RemoteKeyAccessDN ***************/ 
+
+/*************** DoorLocksFM ***************/ 
+
+abstract DoorLocksFM : FeatureModel 
+  Basic : Feature 
+    /* 
+     * This feature is to determine if the driver and passenger should have individual door lock switches or use a central lock switch
+     */
+    IndividualLockSwitch : Feature ? 
+    /* 
+     * This feature is if the door should lock when the car is above a certain speed.
+     */
+    SpeedSmartLock : Feature ? 
+  /* 
+   * Remote Key Access
+   */
+  RKA : Feature ? 
+  /* 
+   * Passive Key Entry
+   */
+  PKE : Feature ? 
+    xor OutsideDoorHandleSensor : Feature 
+      ButtonSensor : Feature ? 
+      CapacitiveSensor : Feature ? 
+  [PKE => RKA]
+
+/*************** End DoorLocksFM ***************/ 
+
+/*************** Car ***************/ 
+
+Car : System 
+  CarArchitecture : Architecture 
+    CarHA : HardwareArchitecture 
+      CarDN : DeviceNodeClassification 
+        BCM : DeviceNode 
+          [this.type in (SmartDeviceNode)]
+        ElectricCenter : DeviceNode 
+          [this.type in (PowerDeviceNode)]
+        TCM : DeviceNode 
+          [this.type in (SmartDeviceNode)]
+        CombinationMeter : DeviceNode 
+          [this.type in (SmartDeviceNode)]
+
+/*************** End Car ***************/ 
+

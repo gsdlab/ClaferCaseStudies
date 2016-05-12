@@ -1,0 +1,361 @@
+/*************** Reference_Model ***************/ 
+
+abstract System 
+abstract FeatureModel 
+abstract Architecture 
+abstract FunctionalAnalysis 
+abstract HardwareArchitecture 
+abstract DeviceNodeClassification 
+abstract CommTopology 
+abstract PowerTopology 
+abstract Deployment 
+
+abstract Feature 
+
+abstract FunctionalAnalysisComponent 
+  deployedTo -> DeviceNode 
+  xor implementation 
+    hardware 
+      [deployedTo.type in (EEDeviceNode , SmartDeviceNode)]
+    software 
+      [deployedTo.type in SmartDeviceNode]
+
+
+abstract AnalysisFunction : FunctionalAnalysisComponent 
+  [deployedTo.type in SmartDeviceNode]
+
+abstract FunctionalDevice : FunctionalAnalysisComponent 
+  [deployedTo.type in (SmartDeviceNode , EEDeviceNode)]
+
+abstract FunctionConnector 
+  sender -> FunctionalAnalysisComponent 
+  receiver -> FunctionalAnalysisComponent 
+  deployedTo -> HardwareDataConnector ? 
+    [this.parent in this.deployedFrom]
+    [(sender.deployedTo.dref , receiver.deployedTo.dref) in (deployedTo.endpoint.dref)]
+  [(sender.deployedTo.dref = receiver.deployedTo.dref) <=> no(this.deployedTo)]
+
+
+enum DeviceNodeType = SmartDeviceNode | EEDeviceNode | PowerDeviceNode
+abstract DeviceNode 
+  type -> DeviceNodeType 
+
+abstract HardwareConnector 
+
+abstract PowerConnector : HardwareConnector 
+  source -> DeviceNode 
+  sink -> DeviceNode 
+
+abstract LoadPowerConnector : PowerConnector 
+abstract DevicePowerConnector : PowerConnector 
+
+abstract HardwareDataConnector : HardwareConnector 
+  endpoint -> DeviceNode 2..* 
+  deployedFrom -> FunctionConnector 1..* 
+    [this.deployedTo = this.parent]
+
+abstract DiscreteDataConnector : HardwareDataConnector 
+abstract AnalogDataConnector : HardwareDataConnector 
+
+abstract BusConnector : HardwareDataConnector 
+  [all e : endpoint | e.type = SmartDeviceNode]
+  xor type 
+    LowSpeedCAN 
+    HighSpeedCAN 
+    LIN 
+    FlexRay 
+
+abstract LogicalBusBridge : HardwareDataConnector 
+  bus -> BusConnector 2..2 
+  [all e : this.endpoint | e.type = SmartDeviceNode]
+
+// Automotive Concepts [TODO] 
+abstract ECU : DeviceNode 
+abstract Switch : DeviceNode 
+abstract Motor : DeviceNode 
+abstract Inline : DeviceNode 
+  abstract Pin : DeviceNode 
+// End Automotive Concepts 
+
+/*************** End Reference_Model ***************/ 
+
+/*************** PassiveKeyEntryFAA ***************/ 
+
+abstract PassiveKeyEntryFAA : FunctionalAnalysis 
+  DriverOutsideLFAntenna : FunctionalDevice 
+    [this.implementation.hardware]
+  DriverLFTransmitter : FunctionalDevice 
+    [this.implementation.hardware]
+  PassOutsideLFAntenna : FunctionalDevice 
+    [this.implementation.hardware]
+  PassLFTransmitter : FunctionalDevice 
+    [this.implementation.hardware]
+
+  InsideFrontLFAntenna : FunctionalDevice 
+    [this.implementation.hardware]
+  InsideCenterLFAntenna : FunctionalDevice 
+    [this.implementation.hardware]
+  InsideRearLFAntenna : FunctionalDevice 
+    [this.implementation.hardware]
+  InsideLFTransmitter : FunctionalDevice 
+    [this.implementation.hardware]
+
+  driverTransMsg : FunctionConnector 
+    [this.sender = DriverLFTransmitter && this.receiver = DriverOutsideLFAntenna]
+  passTransMsg : FunctionConnector 
+    [this.sender = PassLFTransmitter && this.receiver = PassOutsideLFAntenna]
+  insideFrontTransMsg : FunctionConnector 
+    [this.sender = InsideLFTransmitter && this.receiver = InsideFrontLFAntenna]
+  insideCenterTransMsg : FunctionConnector 
+    [this.sender = InsideLFTransmitter && this.receiver = InsideCenterLFAntenna]
+  insideRearTransMsg : FunctionConnector 
+    [this.sender = InsideLFTransmitter && this.receiver = InsideRearLFAntenna]
+
+  PKEControl : AnalysisFunction 
+    [this.implementation.software]
+
+  driverPKEReq : FunctionConnector 
+    [this.sender = PKEControl && this.receiver = DriverLFTransmitter]
+  passPKEReq : FunctionConnector 
+    [this.sender = PKEControl && this.receiver = PassLFTransmitter]
+  insidePKEReq : FunctionConnector 
+    [this.sender = PKEControl && this.receiver = InsideLFTransmitter]
+
+  doorLockControlReq : FunctionConnector 
+    [this.sender = BasicFAA.DoorLockControl && this.receiver = PKEControl]
+  pkeControlReq : FunctionConnector 
+    [this.sender = PKEControl && this.receiver = BasicFAA.DoorLockControl]
+
+  xor OutsideDoorHandleSensorFAA : FunctionalAnalysis 
+    ButtonSensorFAA : FunctionalAnalysis 
+      DriverDoorButtonSensor : FunctionalDevice 
+        [this.implementation.hardware]
+      PassDoorButtonSensor : FunctionalDevice 
+        [this.implementation.hardware]
+      driverDoorHandleReq : FunctionConnector 
+        [this.sender = DriverDoorButtonSensor && this.receiver = PKEControl]
+      passDoorHandleReq : FunctionConnector 
+        [this.sender = PassDoorButtonSensor && this.receiver = PKEControl]
+    CapacitiveSensorFAA : FunctionalAnalysis 
+      DriverDoorCapactiveSensor : FunctionalDevice 
+        [this.implementation.hardware]
+      PassDoorCapacitiveSensor : FunctionalDevice 
+        [this.implementation.hardware]
+      driverDoorHandleReq : FunctionConnector 
+        [this.sender = DriverDoorCapactiveSensor && this.receiver = PKEControl]
+      passDoorHandleReq : FunctionConnector 
+        [this.sender = PassDoorCapacitiveSensor && this.receiver = PKEControl]
+
+  [OutsideDoorHandleSensorFAA.ButtonSensorFAA <=> DoorLocksFM.PKE.OutsideDoorHandleSensor.ButtonSensor]
+  [OutsideDoorHandleSensorFAA.CapacitiveSensorFAA <=> DoorLocksFM.PKE.OutsideDoorHandleSensor.CapacitiveSensor]
+
+/*************** End PassiveKeyEntryFAA ***************/ 
+
+/*************** PassiveKeyEntryDN ***************/ 
+
+abstract PassiveKeyEntryDN : DeviceNodeClassification 
+  Transmitter : DeviceNode ? 
+    [this.type in (EEDeviceNode)]
+  PassiveKeyModule : DeviceNode ? 
+    [this.type in (SmartDeviceNode)]
+
+  InsideFrontAntenna : DeviceNode 
+    [this.type in (EEDeviceNode)]
+  InsideCenterAntenna : DeviceNode 
+    [this.type in (EEDeviceNode)]
+  InsideRearAntenna : DeviceNode 
+    [this.type in (EEDeviceNode)]
+
+  xor OutsideDoorHandleSensorDN : DeviceNodeClassification 
+
+    ButtonSensorDN : DeviceNodeClassification 
+      DriverDoorButtonHandleModule : DeviceNode 
+        [this.type in (EEDeviceNode)]
+      PassDoorButtonHandleModule : DeviceNode 
+        [this.type in (EEDeviceNode)]
+    CapacitiveSensorDN : DeviceNodeClassification 
+      DriverDoorCapacitiveHandleModule : DeviceNode 
+        [this.type in (EEDeviceNode)]
+      PassDoorCapacitiveHandleModule : DeviceNode 
+        [this.type in (EEDeviceNode)]
+
+  [OutsideDoorHandleSensorDN.ButtonSensorDN <=> DoorLocksFM.PKE.OutsideDoorHandleSensor.ButtonSensor]
+  [OutsideDoorHandleSensorDN.CapacitiveSensorDN <=> DoorLocksFM.PKE.OutsideDoorHandleSensor.CapacitiveSensor]
+
+/*************** End PassiveKeyEntryDN ***************/ 
+
+/*************** Car ***************/ 
+
+Car : System 
+  CarArchitecture : Architecture 
+    CarHA : HardwareArchitecture 
+      CarDN : DeviceNodeClassification 
+        BCM : DeviceNode 
+          [this.type in (SmartDeviceNode)]
+        ElectricCenter : DeviceNode 
+          [this.type in (PowerDeviceNode)]
+        TCM : DeviceNode 
+          [this.type in (SmartDeviceNode)]
+        CombinationMeter : DeviceNode 
+          [this.type in (SmartDeviceNode)]
+
+/*************** End Car ***************/ 
+
+/*************** DoorLocksFM ***************/ 
+
+abstract DoorLocksFM : FeatureModel 
+  Basic : Feature 
+    /* 
+     * This feature is to determine if the driver and passenger should have individual door lock switches or use a central lock switch
+     */
+    IndividualLockSwitch : Feature ? 
+    /* 
+     * This feature is if the door should lock when the car is above a certain speed.
+     */
+    SpeedSmartLock : Feature ? 
+  /* 
+   * Remote Key Access
+   */
+  RKA : Feature ? 
+  /* 
+   * Passive Key Entry
+   */
+  PKE : Feature ? 
+    xor OutsideDoorHandleSensor : Feature 
+      ButtonSensor : Feature ? 
+      CapacitiveSensor : Feature ? 
+  [PKE => RKA]
+
+/*************** End DoorLocksFM ***************/ 
+
+/*************** BasicDN ***************/ 
+
+abstract BasicDN : DeviceNodeClassification 
+
+  DriverDoorLockMotorAssembly : DeviceNode 
+    [this.type in (EEDeviceNode)]
+  PassDoorLockMotorAssembly : DeviceNode 
+    [this.type in (EEDeviceNode)]
+  RearRightPassDoorLockMotorAssembly : DeviceNode 
+    [this.type in (EEDeviceNode)]
+  RearLeftPassDoorLockMotorAssembly : DeviceNode 
+    [this.type in (EEDeviceNode)]
+
+  DoorLockButtonDN : DeviceNodeClassification 
+    IndividualLockSwitchDN : DeviceNodeClassification 
+      DriverLockPowerSwitch : DeviceNode 
+        [this.type in (EEDeviceNode)]
+      PassLockPowerSwitch : DeviceNode 
+        [this.type in (EEDeviceNode)]
+    CentralLockSwitchDN : DeviceNodeClassification 
+      CenterLockPowerSwitch : DeviceNode 
+        [this.type in (EEDeviceNode)]
+
+  BCM -> Car.CarArchitecture.CarHA.CarDN.BCM 
+  TCM -> Car.CarArchitecture.CarHA.CarDN.TCM 
+  EC -> Car.CarArchitecture.CarHA.CarDN.ElectricCenter 
+  CombinationMeter -> Car.CarArchitecture.CarHA.CarDN.CombinationMeter ? 
+
+  [DoorLockButtonDN.IndividualLockSwitchDN <=> DoorLocksFM.Basic.IndividualLockSwitch]
+  [CombinationMeter <=> DoorLocksFM.Basic.SpeedSmartLock]
+
+/*************** End BasicDN ***************/ 
+
+/*************** BasicFAA ***************/ 
+
+abstract BasicFAA : FunctionalAnalysis 
+  DoorLockControl : AnalysisFunction 
+    [this.implementation.software]
+
+  DriverDoorCylinderSwitch : FunctionalDevice 
+    [this.implementation.hardware]
+  PassDoorCylinderSwitch : FunctionalDevice 
+    [this.implementation.hardware]
+  driverCylReq : FunctionConnector 
+    [this.sender = DriverDoorCylinderSwitch && this.receiver = DoorLockControl]
+  passCylReq : FunctionConnector 
+    [this.sender = PassDoorCylinderSwitch && this.receiver = DoorLockControl]
+
+  DriverDoorContact : FunctionalDevice 
+    [this.implementation.hardware]
+  PassDoorContact : FunctionalDevice 
+    [this.implementation.hardware]
+  RearRightPassDoorContact : FunctionalDevice 
+    [this.implementation.hardware]
+  RearLeftPassDoorContact : FunctionalDevice 
+    [this.implementation.hardware]
+  driverContactSignal : FunctionConnector 
+    [this.sender = DriverDoorContact && this.receiver = DoorLockControl]
+  passContactSignal : FunctionConnector 
+    [this.sender = PassDoorContact && this.receiver = DoorLockControl]
+  rearRightPassContactSignal : FunctionConnector 
+    [this.sender = RearRightPassDoorContact && this.receiver = DoorLockControl]
+  rearLeftPassContactSignal : FunctionConnector 
+    [this.sender = RearLeftPassDoorContact && this.receiver = DoorLockControl]
+
+  DriverDoorLockSensor : FunctionalDevice 
+    [this.implementation.hardware]
+  PassDoorLockSensor : FunctionalDevice 
+    [this.implementation.hardware]
+  RearRightPassDoorLockSensor : FunctionalDevice 
+    [this.implementation.hardware]
+  RearLeftPassDoorLockSensor : FunctionalDevice 
+    [this.implementation.hardware]
+  driverLockPosition : FunctionConnector 
+    [this.sender = DriverDoorLockSensor && this.receiver = DoorLockControl]
+  passLockPosition : FunctionConnector 
+    [this.sender = PassDoorLockSensor && this.receiver = DoorLockControl]
+  rearRightPassLockPosition : FunctionConnector 
+    [this.sender = RearRightPassDoorLockSensor && this.receiver = DoorLockControl]
+  rearLeftPassLockPosition : FunctionConnector 
+    [this.sender = RearLeftPassDoorLockSensor && this.receiver = DoorLockControl]
+
+  DriverDoorLockMotor : FunctionalDevice 
+    [this.implementation.hardware]
+  PassDoorLockMotor : FunctionalDevice 
+    [this.implementation.hardware]
+  RearRightPassDoorLockMotor : FunctionalDevice 
+    [this.implementation.hardware]
+  RearLeftPassDoorLockMotor : FunctionalDevice 
+    [this.implementation.hardware]
+  driverLockCmd : FunctionConnector 
+    [this.sender = DoorLockControl && this.receiver = DriverDoorLockMotor]
+  passLockCmd : FunctionConnector 
+    [this.sender = DoorLockControl && this.receiver = PassDoorLockMotor]
+  rearRightPassLockCmd : FunctionConnector 
+    [this.sender = DoorLockControl && this.receiver = RearRightPassDoorLockMotor]
+  rearLeftPassLockCmd : FunctionConnector 
+    [this.sender = DoorLockControl && this.receiver = RearLeftPassDoorLockMotor]
+
+  GearPositionSensor : FunctionalDevice 
+    [this.implementation.hardware]
+  gearPosition : FunctionConnector 
+    [this.sender = GearPositionSensor && this.receiver = DoorLockControl]
+
+  xor DoorLockButtonFAA : FunctionalAnalysis 
+    IndividualLockSwitchFAA : FunctionalAnalysis 
+      DriverDoorLockButton : FunctionalDevice 
+        [this.implementation.hardware]
+      PassDoorLockButton : FunctionalDevice 
+        [this.implementation.hardware]
+      driverDoorLockReq : FunctionConnector 
+        [this.sender = DriverDoorLockButton && this.receiver = DoorLockControl]
+      passDoorLockReq : FunctionConnector 
+        [this.sender = PassDoorLockButton && this.receiver = DoorLockControl]
+    CentralLockSwitchFAA : FunctionalAnalysis 
+      CentralLockButton : FunctionalDevice 
+        [this.implementation.hardware]
+      centralDoorLockReq : FunctionConnector 
+        [this.sender = CentralLockButton && this.receiver = DoorLockControl]
+
+  SpeedSmartLockFAA : FunctionalAnalysis ? 
+    SpeedSensor : FunctionalDevice 
+      [this.implementation.hardware]
+    speed : FunctionConnector 
+      [this.sender = SpeedSensor && this.receiver = DoorLockControl]
+
+  [DoorLockButtonFAA.IndividualLockSwitchFAA <=> DoorLocksFM.Basic.IndividualLockSwitch]
+  [SpeedSmartLockFAA <=> DoorLocksFM.Basic.SpeedSmartLock]
+
+/*************** End BasicFAA ***************/ 
+

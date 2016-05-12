@@ -1,0 +1,587 @@
+//---------------------------- Meta-Model Elements --------------------------//
+// Meta-Model Elements - This section contains all meta-model elements that
+// are used to model a general automotive E/E architecture. Most of the 
+// elements are adapted from the EAST-ADL v2 specification.
+
+// System is our version of the EAST-ADL "System Model". The two are similiar
+// but have a couple differences:
+//  - The implementation level is ignored.
+//  - The analysis level and design level have been combined into the 
+//      architecture 
+//IMP: See https://github.com/gsdlab/clafer/issues/67
+// abstract System
+//     abstract FeatureModel
+//     abstract Architecture
+//         abstract FunctionalAnalysis
+//         abstract HardwareArchitecture
+//             abstract DeviceNodeClassification
+//             abstract CommTopology
+//             abstract PowerTopology
+//         abstract Deployment
+//             fa -> FunctionalAnalysis
+//             ha -> HardwareArchitecture
+abstract System
+abstract FeatureModel
+abstract Architecture
+abstract FunctionalAnalysis
+abstract HardwareArchitecture
+abstract DeviceNodeClassification
+abstract CommTopology
+abstract PowerTopology
+abstract Deployment
+
+// Some generic "types" of Clafer's. Some types don't have properties but
+// are rather used for readability for a user
+abstract Feature
+
+abstract FunctionalAnalysisComponent
+    deployedTo -> DeviceNode
+    xor implementation
+        hardware
+            [latency = baseLatency]
+            [deployedTo.type in (EEDeviceNode, SmartDeviceNode)]
+        software
+            [latency = baseLatency*deployedTo.speedFactor]
+            [deployedTo.type in SmartDeviceNode]
+    baseLatency -> integer // [ms]
+    latency -> integer // [ms]
+abstract AnalysisFunction : FunctionalAnalysisComponent
+abstract FunctionalDevice : FunctionalAnalysisComponent
+abstract FunctionConnector
+    sender -> FunctionalAnalysisComponent
+    receiver -> FunctionalAnalysisComponent
+    deployedTo -> HardwareDataConnector ?
+        [parent in this.deployedFrom]
+        [(sender.deployedTo.dref, receiver.deployedTo.dref) in (deployedTo.endpoint.dref)]
+    [(sender.deployedTo.dref = receiver.deployedTo.dref) <=> no this.deployedTo]
+    latency -> integer // [us]
+    messageSize -> integer // [byte]
+    [if (deployedTo) then (latency = messageSize*deployedTo.transferTimePerSize) else (latency = 0)]
+
+
+enum DeviceNodeType = SmartDeviceNode | EEDeviceNode | PowerDeviceNode
+
+abstract DeviceNode
+    type -> DeviceNodeType
+    speedFactor -> integer // unitless
+    mass -> integer // [g]
+    cost -> integer // [dollar]
+    ppm -> integer // unitless
+    replaceCost -> integer // [dollar]
+    warrantyCost -> integer = ppm*replaceCost // [dollar per million]
+    [(type in (PowerDeviceNode, EEDeviceNode)) => (speedFactor = 0)]
+
+
+// Hardware Connection Mediums
+abstract HardwareConnector
+    length -> integer // [cm]
+    mass -> integer // [mg]
+    cost -> integer // [dollar per thousand]
+abstract PowerConnector : HardwareConnector
+    source -> DeviceNode
+    sink -> DeviceNode
+abstract LoadPowerConnector : PowerConnector
+    [mass = Data.MassPerLength.LoadPowerConnector*length]
+    [cost = Data.CostPerLength.LoadPowerConnector*length]
+abstract DevicePowerConnector : PowerConnector
+    [mass = Data.MassPerLength.DevicePowerConnector*length]
+    [cost = Data.CostPerLength.DevicePowerConnector*length]
+
+abstract HardwareDataConnector : HardwareConnector
+    endpoint -> DeviceNode 2..*
+    deployedFrom -> FunctionConnector 1..*
+        [this.deployedTo = parent]
+    transferTimePerSize -> integer // [us/byte]
+        
+abstract DiscreteDataConnector : HardwareDataConnector
+    [mass = length*(#deployedFrom)*Data.MassPerLength.DiscreteDataConnector]
+    [transferTimePerSize = 0]
+    [cost = Data.CostPerLength.DiscreteDataConnector*length*(#deployedFrom)]
+
+abstract AnalogDataConnector : HardwareDataConnector
+    [mass = length*(#deployedFrom)*Data.MassPerLength.AnalogDataConnector]
+    [transferTimePerSize = 0]
+    [cost = Data.CostPerLength.AnalogDataConnector*length*(#deployedFrom)]
+
+abstract BusConnector : HardwareDataConnector
+    [endpoint.type = SmartDeviceNode]
+    xor type
+        LowSpeedCAN
+            [transferTimePerSize = Data.TimePerSize.LowSpeedCANBus]
+            [mass = Data.MassPerLength.LowSpeedCANBus*length]
+            [cost = Data.CostPerLength.LowSpeedCANBus*length]
+        HighSpeedCAN
+            [transferTimePerSize = Data.TimePerSize.HighSpeedCANBus]
+            [mass = Data.MassPerLength.HighSpeedCANBus*length]
+            [cost = Data.CostPerLength.HighSpeedCANBus*length]
+        LIN
+            [transferTimePerSize = Data.TimePerSize.LINBus]
+            [mass = Data.MassPerLength.LINBus*length]
+            [cost = Data.CostPerLength.LINBus*length]
+        FlexRay
+            [transferTimePerSize = Data.TimePerSize.FlexRayBus]
+            [mass = Data.MassPerLength.FlexRayBus*length]
+            [cost = Data.CostPerLength.FlexRayBus*length]
+
+abstract LogicalBusBridge : HardwareDataConnector
+    [endpoint.type = SmartDeviceNode]
+    bus -> BusConnector 2
+    gatewayTransferTimePerSize -> integer // [us/byte]
+    [transferTimePerSize = gatewayTransferTimePerSize + sum(bus.transferTimePerSize)]
+    [length = 0]
+    [mass = 0]
+    [cost = 0]
+
+
+// ---------------------- Quality Attribute Data -----------------------------//
+Data
+    MassPerLength // [mg/cm]
+        LoadPowerConnector -> integer = 185
+        DevicePowerConnector -> integer = 104
+        DiscreteDataConnector -> integer = 110
+        AnalogDataConnector -> integer = 110
+        LowSpeedCANBus -> integer = 20
+        HighSpeedCANBus -> integer = 20
+        LINBus -> integer = 20
+        FlexRayBus -> integer = 40
+    CostPerLength // [dollar per thousand / cm]
+        LoadPowerConnector -> integer = 9
+        DevicePowerConnector -> integer = 9 
+        DiscreteDataConnector -> integer = 13
+        AnalogDataConnector -> integer = 13
+        LowSpeedCANBus -> integer = 52
+        HighSpeedCANBus -> integer = 104
+        LINBus -> integer = 26
+        FlexRayBus -> integer = 208
+    TimePerSize // [us/byte]
+        LowSpeedCANBus -> integer = 64
+        HighSpeedCANBus -> integer = 32
+        LINBus -> integer = 400
+        FlexRayBus -> integer = 1
+    BusProtocolOverhead // [byte]
+        LowSpeedCANBus -> integer = 5
+        HighSpeedCANBus -> integer = 5
+        LINBus -> integer = 4
+        FlexRayBus -> integer = 8
+    ReferenceSpeedFactor -> integer = 10
+
+
+
+//------------------- Power Window Abstract Clafer --------------------------//
+// Power Window Abstract Clafer - This section contains all abstract clafers
+// that detail a generic system/component that can be used in the concerete
+// system model.
+
+abstract WinSysFM : FeatureModel
+    basicUpDown : Feature
+    express : Feature ?
+        expressUp : Feature ?
+
+abstract WinSysFA : FunctionalAnalysis
+    WinSwitch : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 20]
+    WinArbiter : AnalysisFunction
+        [baseLatency = (if implementation.software then 1 else 5)]
+    WinController : AnalysisFunction
+        [implementation.software]
+        [baseLatency = 2]
+    WinMotor : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 10]
+    CurrentSensor : FunctionalDevice
+        [implementation.hardware]
+        [baseLatency = 5]
+
+    localWinReq : FunctionConnector
+        [sender = WinSwitch && receiver = WinArbiter]
+        [messageSize = 1]
+    winReq : FunctionConnector
+        [sender = WinArbiter && receiver = WinController]
+        [messageSize = 1]
+    winCmd : FunctionConnector
+        [sender = WinController && receiver = WinMotor]
+        [messageSize = 2]
+    current : FunctionConnector
+        [sender = CurrentSensor && receiver = WinController]
+        [messageSize = 1]
+
+    PinchDetectionFA : FunctionalAnalysis ?
+        PinchDetection : AnalysisFunction
+            [implementation.software]
+            [baseLatency = 2]
+        PositionSensor : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+        object : FunctionConnector
+            [sender = PinchDetection && receiver = WinController]
+            [messageSize = 2]
+        position : FunctionConnector
+            [sender = PositionSensor && receiver = PinchDetection]
+            [messageSize = 1]
+
+abstract WinSysDN : DeviceNodeClassification
+    BCM -> DeviceNode ?
+    EC -> DeviceNode
+    Switch : SwitchNode
+        [type in (SmartDeviceNode, EEDeviceNode)]
+        [baseMass = 173]
+        [cost = 110]
+        [replaceCost = 110]
+        [if (type in SmartDeviceNode) then (ppm = 50) else (ppm = 10)]
+        [(type in SmartDeviceNode) => (speedFactor = 10)]
+    Motor : DeviceNode
+        [type in (SmartDeviceNode, EEDeviceNode)]
+        [mass = 453]
+        [if (type in SmartDeviceNode) then (cost = 107) else (cost = 122)]
+        [if (type in SmartDeviceNode) then (ppm = 50) else (ppm = 20)]
+        [if (type in SmartDeviceNode) then (replaceCost = 107) else (replaceCost = 122)]
+        [(type in SmartDeviceNode) => (speedFactor = 10)]
+    DoorInline : DeviceNode
+        [type = PowerDeviceNode]
+        [mass = 10] //NOTE: Not a realistic number
+        [cost = 4] //NOTE: Not a realistic number
+        [ppm = 1]
+        [replaceCost = 2] //NOTE: Not a realistic number
+    DoorModule : DeviceNode ?
+        [type = SmartDeviceNode]
+        [mass = 368]
+        [cost = 300]
+        [ppm = 50]
+        [replaceCost = 300]
+        [speedFactor = 10]
+
+abstract WinSysPT : PowerTopology
+    //IMP: I would like redefinition here so that I can write 
+    // dn -> WinSysDN and still have 
+    // dn -> DeviceNodeClassification in the PowerTopology abstract
+    // dn -> WinSysDN (removed as part of step 14.f in Modeling Observations)
+    dn -> WinSysDN
+
+    inlineECDist -> integer
+    inlineBCMDist -> integer
+
+    
+    MotorLoadPowerWire : LoadPowerConnector
+        [sink = dn.Motor]
+    SwitchLoadPowerWire : LoadPowerConnector ?
+        [source = dn.DoorInline && sink = dn.Switch]
+        [length = 45]
+    DoorModuleLoadPowerWire : LoadPowerConnector ?
+        [source = dn.DoorInline && sink = dn.DoorModule]
+        [length = 35]
+    DoorInlineLoadPowerWire : LoadPowerConnector
+        [sink = dn.DoorInline]
+
+    xor MotorLoadPowerConfig
+        SwitchIsMotorDriver
+            [MotorLoadPowerWire.source = dn.Switch]
+            [MotorLoadPowerWire.length = 40]
+            [DoorInlineLoadPowerWire.source = dn.EC.dref]
+            [DoorInlineLoadPowerWire.length = inlineECDist]
+            [SwitchLoadPowerWire && DoorInlineLoadPowerWire && no DoorModuleLoadPowerWire]
+        DoorModuleIsMotorDriver
+            [MotorLoadPowerWire.source = dn.DoorModule]
+            [MotorLoadPowerWire.length = 30]
+            [DoorInlineLoadPowerWire.source = dn.EC.dref]
+            [DoorInlineLoadPowerWire.length = inlineECDist]
+            [no SwitchLoadPowerWire && DoorInlineLoadPowerWire && DoorModuleLoadPowerWire]
+        BCMIsMotorDriver
+            [MotorLoadPowerWire.source = dn.DoorInline]
+            [MotorLoadPowerWire.length = 45]
+            [DoorInlineLoadPowerWire.source = dn.BCM.dref]
+            [DoorInlineLoadPowerWire.length = inlineBCMDist]
+            [no SwitchLoadPowerWire && DoorInlineLoadPowerWire && no DoorModuleLoadPowerWire]
+        MotorIsMotorDriver
+            [MotorLoadPowerWire.source = dn.DoorInline]
+            [MotorLoadPowerWire.length = 45]
+            [DoorInlineLoadPowerWire.source = dn.EC.dref]
+            [DoorInlineLoadPowerWire.length = inlineECDist]
+            [no SwitchLoadPowerWire && DoorInlineLoadPowerWire && no DoorModuleLoadPowerWire]
+
+    switchInlineDP : DevicePowerConnector ?
+        [source = dn.DoorInline && sink = dn.Switch]
+        [length = 45]
+
+    motorInlineDP : DevicePowerConnector ?
+        [source = dn.DoorInline && sink = dn.Motor]
+        [length = 45]
+
+    doorModuleInlineDP : DevicePowerConnector ?
+        [source = dn.DoorInline && sink = dn.DoorModule]
+        [length = 35]
+
+    [doorModuleInlineDP <=> dn.DoorModule]
+
+    inlineECDP : DevicePowerConnector ?
+        [source = dn.EC.dref && sink = dn.DoorInline]
+        [length = WinSysPT.inlineECDist]
+
+abstract WinSysCT : CommTopology
+    dn -> WinSysDN
+    inlineBCMDist -> integer
+
+
+    logicalLowSpeedBus : BusConnector ?
+        [type.LIN || type.LowSpeedCAN]
+        [length = 70+inlineBCMDist]
+        [endpoint in (dn.Motor, dn.Switch, dn.DoorModule, dn.BCM.dref)]
+
+    logicalSwitchMotorDisc : DiscreteDataConnector ?
+        [endpoint = (dn.Switch, dn.Motor)]
+        [length = 40]
+    logicalSwitchBCMDisc: DiscreteDataConnector ?
+        [endpoint = (dn.Switch, dn.BCM.dref)]
+        [length = 45+inlineBCMDist]
+    logicalMotorBCMDisc : DiscreteDataConnector ?
+        [endpoint = (dn.Motor, dn.BCM.dref)]
+        [length = 45+inlineBCMDist]
+    logicalSwitchDoorModuleDisc : DiscreteDataConnector ?
+        [endpoint = (dn.Switch, dn.DoorModule)]
+        [length = 25]
+    logicalMotorDoorModuleDisc : DiscreteDataConnector ?
+        [endpoint = (dn.Motor, dn.DoorModule)]
+        [length = 30]
+
+abstract WinSysHA : HardwareArchitecture
+    //IMP: Redefintion would be nice again here (see explanation in WinSysPT)
+    dn -> WinSysDN
+    pt -> WinSysPT
+    ct -> WinSysCT
+
+
+abstract WinSysDpl : Deployment
+    //IMP: Redefintion would be nice again here (see explanation in WinSysPT)
+    fa -> WinSysFA
+    ha -> WinSysHA
+
+    // The most general deployment constraint that we have is that the
+    // FunctionalAnalysisComponents must be deployed to its own HardwareTopology
+    //IMP: Nested inheritance would be good to get all of the AnalyisFunctionComponents
+    // of fa and device nodes of the hardware toplogy
+    // Because we don't have the nested inheritance we don't make use of the "electric"
+    // property to constrain what devices are valid to deploy to. Instead we hardcode for
+    // now.
+    [fa.WinArbiter.deployedTo.dref in (ha.dn.BCM.dref, ha.dn.Switch, ha.dn.Motor, ha.dn.DoorModule)]
+    [fa.WinController.deployedTo.dref in (ha.dn.BCM.dref, ha.dn.Switch, ha.dn.Motor, ha.dn.DoorModule)]
+    [fa.PinchDetectionFA => (fa.PinchDetectionFA.PinchDetection.deployedTo.dref in (ha.dn.BCM.dref, ha.dn.Switch, ha.dn.Motor, ha.dn.DoorModule))]
+
+    // More specific constraints on functional analysis component...
+    [fa.WinSwitch.deployedTo.dref = ha.dn.Switch]
+    [fa.WinMotor.deployedTo.dref = ha.dn.Motor]
+    [fa.CurrentSensor.deployedTo.dref = ha.dn.Motor]
+    [fa.PinchDetectionFA => (fa.PinchDetectionFA.PositionSensor.deployedTo.dref = ha.dn.Motor)]
+
+    // Constraints pertaining to the power topology selection based on analysis function deployment
+    [(fa.WinController.deployedTo.dref = ha.dn.Switch) <=> ha.pt.MotorLoadPowerConfig.SwitchIsMotorDriver]
+    [(fa.WinController.deployedTo.dref = ha.dn.Motor) <=> ha.pt.MotorLoadPowerConfig.MotorIsMotorDriver]
+    [(fa.WinController.deployedTo.dref = ha.dn.BCM.dref) <=> ha.pt.MotorLoadPowerConfig.BCMIsMotorDriver]
+    [(fa.WinController.deployedTo.dref = ha.dn.DoorModule) <=> ha.pt.MotorLoadPowerConfig.DoorModuleIsMotorDriver]
+
+    [ha.pt.switchInlineDP <=> (ha.dn.Switch.type in SmartDeviceNode)]
+    [ha.pt.motorInlineDP <=> (ha.dn.Motor.type in SmartDeviceNode)]
+    [ha.pt.inlineECDP <=> some(ha.pt.motorInlineDP, ha.pt.switchInlineDP, ha.pt.doorModuleInlineDP)]
+
+    // Constraints pertaining to the communication topology selected based on analysis function deployement
+    //IMP: Nested inheritance would be good to get all of the FunctionConnector of fa and HardwareDataConnector of ct
+    // to have a more general constraint.
+    [(fa.localWinReq.deployedTo.dref in (ha.ct.logicalLowSpeedBus, ha.ct.logicalSwitchMotorDisc, ha.ct.logicalSwitchBCMDisc, ha.ct.logicalMotorBCMDisc, ha.ct.logicalSwitchDoorModuleDisc, ha.ct.logicalMotorDoorModuleDisc))]
+    [(fa.winReq.deployedTo.dref in (ha.ct.logicalLowSpeedBus, ha.ct.logicalSwitchMotorDisc, ha.ct.logicalSwitchBCMDisc, ha.ct.logicalMotorBCMDisc, ha.ct.logicalSwitchDoorModuleDisc, ha.ct.logicalMotorDoorModuleDisc))]
+    [(fa.winCmd.deployedTo.dref in (ha.ct.logicalLowSpeedBus, ha.ct.logicalSwitchMotorDisc, ha.ct.logicalSwitchBCMDisc, ha.ct.logicalMotorBCMDisc, ha.ct.logicalSwitchDoorModuleDisc, ha.ct.logicalMotorDoorModuleDisc))]
+    [(fa.current.deployedTo.dref in (ha.ct.logicalLowSpeedBus, ha.ct.logicalSwitchMotorDisc, ha.ct.logicalSwitchBCMDisc, ha.ct.logicalMotorBCMDisc, ha.ct.logicalSwitchDoorModuleDisc, ha.ct.logicalMotorDoorModuleDisc))]
+    [(fa.PinchDetectionFA.object.deployedTo.dref in (ha.ct.logicalLowSpeedBus, ha.ct.logicalSwitchMotorDisc, ha.ct.logicalSwitchBCMDisc, ha.ct.logicalMotorBCMDisc, ha.ct.logicalSwitchDoorModuleDisc, ha.ct.logicalMotorDoorModuleDisc))]
+    [(fa.PinchDetectionFA.position.deployedTo.dref in (ha.ct.logicalLowSpeedBus, ha.ct.logicalSwitchMotorDisc, ha.ct.logicalSwitchBCMDisc, ha.ct.logicalMotorBCMDisc, ha.ct.logicalSwitchDoorModuleDisc, ha.ct.logicalMotorDoorModuleDisc))]
+
+abstract SwitchNode : DeviceNode
+    numSwitches -> integer
+    baseMass -> integer
+    [mass = baseMass*numSwitches]
+
+
+//-------------------- Power Window System Model ----------------------------//
+// Power Window System Model - This section is the concrete model of the power
+// window system. This is the model that instances will be generated for. It
+// will heavily use the previous two sections.
+
+// Driver Window System
+DriverWinSys : System
+    DWinSysFM : WinSysFM
+    DWinSysFA : WinSysFA
+        [DriverWinSys.DWinSysFM.express.expressUp <=> DWinSysFA.PinchDetectionFA]
+        // Timing Chains
+        SwitchToControlDeviceLatency -> integer = WinSwitch.latency + WinArbiter.latency
+        ControlToMotorDeviceLatency -> integer = WinController.latency + WinMotor.latency
+        SwitchToControlCommLatency -> integer = localWinReq.latency + winReq.latency
+        ControlToMotorCommLatency -> integer = winCmd.latency
+        SwitchToMotorEndToEndLatency -> integer = SwitchToControlDeviceLatency + ControlToMotorDeviceLatency + (SwitchToControlCommLatency+ControlToMotorCommLatency)/1000
+        
+        PositionSensorToControlDeviceLatency -> integer = PositionSensor.latency + PinchDetection.latency
+        PositionSensorToControlCommLatency -> integer = position.latency + object.latency
+        PositionSensorToMotorEndToEndLatency -> integer = PositionSensorToControlDeviceLatency + ControlToMotorDeviceLatency + (PositionSensorToControlCommLatency+ControlToMotorCommLatency)/1000
+
+        SwitchToControlLatency -> integer = SwitchToControlDeviceLatency + SwitchToControlCommLatency/1000
+        PositionSensorToControlLatency -> integer = PositionSensorToControlDeviceLatency + PositionSensorToControlCommLatency/1000
+        ControlInputDifference -> integer
+        [ControlInputDifference = (max(SwitchToControlLatency.dref, PositionSensorToControlLatency.dref) 
+            - min(SwitchToControlLatency.dref, PositionSensorToControlLatency.dref))]
+
+        // End-to-End Timing Constraint(s)
+        [(TimingRequirements.BasicEndToEndLatency) => (SwitchToMotorEndToEndLatency <= TimingRequirements.BasicEndToEndLatency)]
+        [(PinchDetectionFA && TimingRequirements.PinchDetectionEndToEndLatency) => (PositionSensorToMotorEndToEndLatency <= TimingRequirements.PinchDetectionEndToEndLatency)]
+        // Input Synchronization Contraint(s)
+        [(PinchDetectionFA && TimingRequirements.ControlInputSynchLatency) => ControlInputDifference <= TimingRequirements.ControlInputSynchLatency]
+
+        // Timing Margins
+        BasicEndToEndLatencyMargin -> integer ?
+        [if TimingRequirements.BasicEndToEndLatency then (BasicEndToEndLatencyMargin = (TimingRequirements.BasicEndToEndLatency - SwitchToMotorEndToEndLatency))
+            else (no BasicEndToEndLatencyMargin)]
+        PinchDetectionEndToEndLatencyMargin -> integer ?
+        [if TimingRequirements.PinchDetectionEndToEndLatency then (
+            PinchDetectionEndToEndLatencyMargin = (TimingRequirements.PinchDetectionEndToEndLatency - PositionSensorToMotorEndToEndLatency)) 
+            else (no PinchDetectionEndToEndLatencyMargin)]            
+    DWinSysHA : WinSysHA
+        DWinSysDN : WinSysDN
+            [this.BCM = Car.BCM]
+            [this.EC = Car.EC]
+            [this.Switch.numSwitches = 2]
+        DWinSysPT : WinSysPT
+            [dn = DWinSysDN]
+            [inlineECDist = 40]
+            [inlineBCMDist = 40]
+        DWinSysCT : WinSysCT
+            [dn = DWinSysDN]
+            [inlineBCMDist = 40]
+        [dn = DWinSysDN]
+        [pt = DWinSysPT]
+        [ct = DWinSysCT]
+    DWinSysDpl : WinSysDpl
+        [fa = DWinSysFA]
+        [ha = DWinSysHA]
+
+
+// Passenger Window System
+PassengerWinSys : System
+    PWinSysFM : WinSysFM
+        [express => DriverWinSys.DWinSysFM.express]
+        [express.expressUp => DriverWinSys.DWinSysFM.express.expressUp]
+    PWinSysFA : WinSysFA
+        [PassengerWinSys.PWinSysFM.express.expressUp <=> PWinSysFA.PinchDetectionFA]
+        DWinSwitch : FunctionalDevice
+            [implementation.hardware]
+            [baseLatency = 10]
+        dWinReq : FunctionConnector
+            [sender = DWinSwitch && receiver = WinArbiter]
+            [messageSize = 1]
+
+        // Timing Chains
+        SwitchToControlDeviceLatency -> integer = WinSwitch.latency + WinArbiter.latency
+        ControlToMotorDeviceLatency -> integer = WinController.latency + WinMotor.latency
+        SwitchToControlCommLatency -> integer = localWinReq.latency + winReq.latency
+        ControlToMotorCommLatency -> integer = winCmd.latency
+        SwitchToMotorEndToEndLatency -> integer = SwitchToControlDeviceLatency + ControlToMotorDeviceLatency + (SwitchToControlCommLatency+ControlToMotorCommLatency)/1000
+        
+        PositionSensorToControlDeviceLatency -> integer = PositionSensor.latency + PinchDetection.latency
+        PositionSensorToControlCommLatency -> integer = position.latency + object.latency
+        PositionSensorToMotorEndToEndLatency -> integer = PositionSensorToControlDeviceLatency + ControlToMotorDeviceLatency + (PositionSensorToControlCommLatency+ControlToMotorCommLatency)/1000
+
+        SwitchToControlLatency -> integer = SwitchToControlDeviceLatency + SwitchToControlCommLatency/1000
+        PositionSensorToControlLatency -> integer = PositionSensorToControlDeviceLatency + PositionSensorToControlCommLatency/1000
+        ControlInputDifference -> integer
+        [ControlInputDifference = (max(SwitchToControlLatency.dref, PositionSensorToControlLatency.dref) 
+            - min(SwitchToControlLatency.dref, PositionSensorToControlLatency.dref))]
+
+        // End-to-End Timing Constraint(s)
+        [(TimingRequirements.BasicEndToEndLatency) => (SwitchToMotorEndToEndLatency <= TimingRequirements.BasicEndToEndLatency)]
+        [(PinchDetectionFA && TimingRequirements.PinchDetectionEndToEndLatency) => (PositionSensorToMotorEndToEndLatency <= TimingRequirements.PinchDetectionEndToEndLatency)]
+        // Input Synchronization Contraint(s)
+        [(PinchDetectionFA && TimingRequirements.ControlInputSynchLatency) => ControlInputDifference <= TimingRequirements.ControlInputSynchLatency]
+
+        // Timing Margins
+        BasicEndToEndLatencyMargin -> integer ?
+        [if TimingRequirements.BasicEndToEndLatency then (BasicEndToEndLatencyMargin = (TimingRequirements.BasicEndToEndLatency - SwitchToMotorEndToEndLatency))
+            else (no BasicEndToEndLatencyMargin)]
+        PinchDetectionEndToEndLatencyMargin -> integer ?
+        [if TimingRequirements.PinchDetectionEndToEndLatency then (
+            PinchDetectionEndToEndLatencyMargin = (TimingRequirements.PinchDetectionEndToEndLatency - PositionSensorToMotorEndToEndLatency)) 
+            else (no PinchDetectionEndToEndLatencyMargin)]
+
+    PWinSysHA : WinSysHA
+        PWinSysDN : WinSysDN
+            [this.BCM = Car.BCM]
+            [this.EC = Car.EC]
+            [this.Switch.numSwitches = 1]
+            DSwitch -> SwitchNode
+            [DSwitch = DriverWinSys.DWinSysHA.DWinSysDN.Switch]
+        PWinSysPT : WinSysPT
+            [dn = PWinSysDN]
+            [inlineECDist = 130]
+            [inlineBCMDist = 130]
+        PWinSysCT : WinSysCT
+            [dn = PWinSysDN]
+            [inlineBCMDist = 130]
+            logicalDoorBusJoin : LogicalBusBridge ?
+                [bus = (PWinSysCT.logicalLowSpeedBus, DWinSysCT.logicalLowSpeedBus)]
+                [gatewayTransferTimePerSize = 10] // This is the time to transfer a unit size over the gateway
+                [endpoint in (PWinSysDN.Motor, PWinSysDN.Switch, PWinSysDN.DoorModule, PWinSysDN.BCM.dref, DWinSysDN.Motor, DWinSysDN.Switch, DWinSysDN.DoorModule)]
+            logicalDriveSwitchPassSwitch : DiscreteDataConnector ?
+                [length = 260]
+                [endpoint = (PWinSysHA.PWinSysDN.DSwitch.dref, PWinSysHA.PWinSysDN.Switch)]
+            logicalDriveSwitchPassMotor : DiscreteDataConnector ?
+                [length = 260]
+                [endpoint = (PWinSysHA.PWinSysDN.DSwitch.dref, PWinSysHA.PWinSysDN.Motor)]
+            logicalDriveSwitchPassDoorModule : DiscreteDataConnector ?
+                [length = 250]
+                [endpoint = (PWinSysHA.PWinSysDN.DSwitch.dref, PWinSysHA.PWinSysDN.DoorModule)]
+            logicalDriveSwitchBCM : DiscreteDataConnector ?
+                [length = 85]
+                [endpoint = (PWinSysHA.PWinSysDN.DSwitch.dref, PWinSysHA.PWinSysDN.BCM.dref)]
+        [dn = PWinSysDN]
+        [pt = PWinSysPT]
+        [ct = PWinSysCT]
+    PWinSysDpl : WinSysDpl
+        [fa = PWinSysFA]
+        [ha = PWinSysHA]
+        //IMP: We need redefintion so that we can refer to our modified PWinSysFA and PWinSysHA
+        [PWinSysFA.DWinSwitch.deployedTo.dref = PWinSysHA.PWinSysDN.DSwitch.dref]
+        [PWinSysFA.dWinReq.deployedTo.dref in (
+            PWinSysHA.PWinSysCT.logicalDoorBusJoin,
+            PWinSysHA.PWinSysCT.logicalDriveSwitchPassSwitch, 
+            PWinSysHA.PWinSysCT.logicalDriveSwitchPassMotor,
+            PWinSysHA.PWinSysCT.logicalDriveSwitchPassDoorModule,
+            PWinSysHA.PWinSysCT.logicalDriveSwitchBCM)]
+
+//----------------------------- Car System Model ----------------------------//
+Car
+    BCM : DeviceNode ?
+        [type = SmartDeviceNode]
+        [mass = 408]
+        [cost = 460]
+        [ppm = 50]
+        [replaceCost = 460]
+        [speedFactor = 10]
+    EC : DeviceNode
+        [type = PowerDeviceNode]
+        [mass = 0]//NOTE: Not a realistic number
+        [cost = 0]//NOTE: Not a realistic number
+        [ppm = 10]
+        [replaceCost = 0]//NOTE: Not a realistic number
+
+
+totalCarMass -> integer = sum(DeviceNode.mass) + (sum(HardwareConnector.mass)/1000)
+totalCarCost -> integer = sum(DeviceNode.cost) + (sum(HardwareConnector.cost)/1000)
+totalCarWarrantyCost -> integer = sum(DeviceNode.warrantyCost)
+
+
+// Timing Requirements
+TimingRequirements
+    BasicEndToEndLatency -> integer ?
+    PinchDetectionEndToEndLatency -> integer ?
+    ControlInputSynchLatency -> integer ?
+
+// Optimization Goals:
+// Comment out these goals if optimization should not be perfromed (no other modifications are necessary)
+// << minimize totalCarMass >>
+// << minimize totalCarCost >>
+// << minimize totalCarWarrantyCost >>
+
+

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dependenciesRoot>
+  <dependency className="PowerWindow.TwoDoor.Car" file="Car.cfr" />
+  <dependency className="PowerWindow.TwoDoor.DriverWinSys" file="DriverWinSys.cfr" />
+  <dependency className="PowerWindow.TwoDoor.FrontPassWinSys" file="FrontPassWinSys.cfr" />
+  <dependency className="PowerWindow.TwoDoor.Reference_Model" file="Reference_Model.cfr" />
+  <dependency className="PowerWindow.TwoDoor.Test_WinSysPT" file="Test_WinSysPT.cfr" />
+  <dependency className="PowerWindow.TwoDoor.WinSysCT" file="WinSysCT.cfr" />
+  <dependency className="PowerWindow.TwoDoor.WinSysDN" file="WinSysDN.cfr" />
+  <dependency className="PowerWindow.TwoDoor.WinSysDpl" file="WinSysDpl.cfr" />
+  <dependency className="PowerWindow.TwoDoor.WinSysFAA" file="WinSysFAA.cfr" />
+  <dependency className="PowerWindow.TwoDoor.WinSysFM" file="WinSysFM.cfr" />
+  <dependency className="PowerWindow.TwoDoor.WinSysHA" file="WinSysHA.cfr" />
+  <dependency className="PowerWindow.TwoDoor.WinSysPT" file="WinSysPT.cfr" />
+</dependenciesRoot>
+

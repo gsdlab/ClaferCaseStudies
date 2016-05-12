@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dependenciesRoot>
+  <dependency className="Environment.Car.Car" file="Car.cfr" />
+  <dependency className="Environment.Car.EAST_ADL" file="EAST_ADL.cfr" />
+</dependenciesRoot>
+
