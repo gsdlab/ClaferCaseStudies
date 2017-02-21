@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+<problem><!-- This replaces the CONTEXT_SOURCE tag and some others -->
+		<type>au.edu.swin.archeopterix.problem.deployment.Deployment</type>
+		<definition varies="false">powerWindow_dumbHA.xml</definition>
+		<!-- If no package name is included assumes that the given evaluator is in the ...evaluation package.
+			If it isn't then the fully-qualified name must be given. -->
+		<objectives>
+			<objective name="DataComRelEvaluator" active="false" maxvalue="1.0"  minvalue="0.8"/>
+			<objective name="ComOHEvaluator" active="true" maxvalue="150.0" minvalue="10"/>
+			<objective name="CostEvaluator" active="false" maxvalue="1.0"/>
+			<objective name="EnergyConsumptionEvaluator" active="false" maxvalue="5.0"/>
+			<objective name="ResponseTimeEvaluator" active="false" maxvalue="10.0"/>
+			<objective name="ReliabilityEvaluator" id="0" active="false" maxvalue="1.0"  minvalue="0.0"/>
+			<objective name="ReliabilityEvaluator" id="1" active="false" />
+			<objective name="ReliabilityEvaluator" id="2" active="false" />
+            <objective name="SchedulingLengthEvaluator" active="true" maxvalue="2.0" minvalue="0.01"/>
+		</objectives>
+
+		<solutionRep>au.edu.swin.archeopterix.problem.deployment.solution.ECUBasedDeployment</solutionRep>
+	</problem>
+
+	<run repeats="1" separateResults="false">
+		<algorithm>au.edu.swin.archeopterix.algorithm.ea.NSGA</algorithm>
+		<!-- SEQUENTIAL or CLOCK -->
+		<randomSeedSource>CLOCK</randomSeedSource>
+		<!-- If randomSeeds is SEQUENTIAL, this should be set to the first one -->
+		<firstRandomSeed>1</firstRandomSeed>
+		<logFileNamePrefix>archeopterix</logFileNamePrefix>
+        	<resultsFileNamePrefix>_trial_3objectives</resultsFileNamePrefix>
+		<!-- <populationFileName>out/POP_H23_C58.xml</populationFileName><!-- comment this line to generate automatically --> -->
+	</run>
+
+	
+	<!-- This approach of separating the parameters could be useful if want to keep them in the file for reference. -->
+	<!-- Parameters for "Algorithm" could also be placed within the parameters block for the actual algorithm
+		that will be run, since they are still applicable there. -->
+	<parameters for="au.edu.swin.archeopterix.algorithm.Algorithm">
+		<param name="StopCondition" type="au.edu.swin.archeopterix.algorithm.StopCondition">AFTER_N_EVALUATIONS</param>
+                <!-- AFTER_N_EVALUATIONS or AFTER_N_ITERATIONS -->
+		<param name="MaxIterations" type="integer">50</param>
+		<param name="MaxEvaluations" type="integer">150</param>
+		<param name="ConstraintHandling" type="au.edu.swin.archeopterix.solution.ConstraintHandling">IGNORE</param>
+	</parameters>
+        <parameters for="au.edu.swin.archeopterix.algorithm.UniformRandom">
+		<param name="solutionsCycle" type="integer">10000</param>
+                 <param name="useHillclimbing" type="boolean">true</param>
+                <!-- Should the randomised construction use constraints -->
+                <param name="useConstraints" type="boolean">true</param>
+                <param name="compSelOrder" type="au.edu.swin.archeopterix.algorithm.paco.CompSelectionOrder">RANDOMISED</param>
+	</parameters>
+	<parameters for="au.edu.swin.archeopterix.algorithm.ea.EA">
+		<param name="popSize" type="integer">100</param>
+		<!-- DEFAULT_MUTATION, ONE_POINT_MUTATION, UNIFORM_MUTATION, SWAP_MUTATATION, SWAP_POINT_MUTATATION, MULTIPLE_POINT_MUTATION;-->
+		<param name="mutationOpID" type="au.edu.swin.archeopterix.algorithm.ea.MutationOperator">UNIFORM_MUTATION</param>
+		<!--DEFAULT, ONE_POINT_CROSSOVER, UNIFORM_CROSSOVER;-->
+		<param name="crossoverOpID" type="au.edu.swin.archeopterix.algorithm.ea.CrossoverOperator">ONE_POINT_CROSSOVER</param>
+		
+		<param name="mutationRate" type="double">0.5</param>
+		<param name="crossoverRate" type="double">1.0</param>
+		<param name="generationRate" type="double">0.9</param>
+	</parameters>
+	<parameters for="au.edu.swin.archeopterix.algorithm.ea.NSGA">
+		<param name="matingTournamentSize" type="integer">2</param>
+		<param name="solutionsCycle" type="integer">50</param>
+		<param name="matingPoolSize" type="integer">50</param>
+                <param name="useHillclimbing" type="boolean">false</param>
+                         <!-- DEFAULT or FEWEST_ASSIGNMENTS or FEWEST_ASSIGNMENTS_LARGEST_SIZE or RANDOMISED -->
+		<param name="compSelOrder" type="au.edu.swin.archeopterix.algorithm.paco.CompSelectionOrder">DEFAULT</param>
+	</parameters>
+    
+	<parameters for="au.edu.swin.archeopterix.algorithm.paco.PACO">
+		<param name="solutionsCycle" type="integer">50</param>
+                <param name="pheroAddition" type="double">0.2</param>
+                 <param name="transitionRule" type="double">0.9</param>
+                <param name="useHillclimbing" type="boolean">true</param>
+                <param name="kSolutionsUpdatePher" type="integer">3</param>
+                <!-- DEFAULT or FEWEST_ASSIGNMENTS or FEWEST_ASSIGNMENTS_LARGEST_SIZE or RANDOMISED -->
+		<param name="compSelOrder" type="au.edu.swin.archeopterix.algorithm.paco.CompSelectionOrder">DEFAULT</param>
+		</parameters>
+		 <parameters for="au.edu.swin.archeopterix.algorithm.hillclimbing.HillClimbing">
+               <param name="howManyToHillclimb" type="boolean">true</param>
+                 <param name="timeout" type="integer">30</param>
+                <param name="howManyToHillclimb" type="integer">10</param>
+ 
+                <!-- SOPHISTICATED or SIMPLE or DIAGNOSTIC -->
+		<param name="hillclimber" type="au.edu.swin.archeopterix.algorithm.hillclimbing.HillClimbingType">SOPHISTICATED</param>
+
+	</parameters>
+	
+	<parameters for="au.edu.swin.archeopterix.parallel.AlgoManager">
+		<param name="useHillclimbing" type="boolean">false</param> <!-- Irrelavant Parameter.  But have to use becasue of a bug in getApplicableParameters :( -->
+		<param name="LearningAlgoClass" type="class">au.edu.swin.archeopterix.algorithm.learning.forecast.PearsonForecast</param>
+		<param name="NumberOfIterations" type="integer">20</param>
+		<param name="NumberOfExecutors" type="integer">2</param>
+		<param name="RepeatsOfSameConfiguration" type="integer">1</param>
+		<param name="ResultsLogFileName" type="string">./out/Results/AlgoManagerOutput.txt</param>
+	</parameters>
+	
+	<parameters for="au.edu.swin.archeopterix.algorithm.learning.LearningAlgorithm">
+		<param name="useHillclimbing" type="boolean">false</param> <!-- Irrelavant Parameter.  But have to use becasue of a bug in getApplicableParameters :( -->
+		<param name="LearningPerformanceMetric" type="au.edu.swin.archeopterix.algorithm.learning.AlgoPerformanceMetrics">HYPERVOLUME_DIFF</param> <!-- HYPERVOLUME,EPSILON_INDICATOR-->
+		<param name="PopulationHandelingMethod" type="au.edu.swin.archeopterix.algorithm.learning.PopulationOptions">NONE</param><!-- NONE,COMPOSITE_POPULATION,ALL_NONDOMINATED-->
+		<param name="ResultsLogFileName" type="string">./out/Results/LearningResults.txt</param>
+	</parameters>	
+	
+	<parameters for="au.edu.swin.archeopterix.algorithm.learning.forecast.ARIMAForecast">
+		<param name="useHillclimbing" type="boolean">false</param> <!-- Irrelavant Parameter.  But have to use becasue of a bug in getApplicableParameters :( -->
+		<param name="AutoregressionDepth" type="integer">1</param> <!-- p -->
+		<param name="MovingAverageDepth" type="integer">0</param><!-- q -->
+		<param name="Multiplicity" type="integer">1</param> <!-- d -->
+    	</parameters>	
+	<parameters for="au.edu.swin.archeopterix.algorithm.learning.forecast.EWMAForecast">
+		<param name="useHillclimbing" type="boolean">false</param> <!-- Irrelavant Parameter.  But have to use becasue of a bug in getApplicableParameters :( -->
+		<param name="DegreeOfWeightingDecrease" type="double">0.3</param> <!-- Lambda -->
+		<param name="RouletteExplorationRatio" type="double">0</param> <!-- Ratio of Exploration allowed in roulette wheel selection -->
+	</parameters>	
+
+</configuration>

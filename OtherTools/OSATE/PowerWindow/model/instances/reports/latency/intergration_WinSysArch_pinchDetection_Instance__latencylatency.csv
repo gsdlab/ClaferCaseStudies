@@ -1,0 +1,260 @@
+Latency Analysis Report
+
+Flow analysis for end to end flow dWinSubSysFA.f0 (Async)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device winSwitch,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winSwitch.localWinReq -> winRqArbiter.thr_arbiter.localWinReq,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_arbiter,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winRqArbiter.thr_arbiter.winReq -> winController.thr_control.winReq,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow dWinSubSysFA.f0 (Sync)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device winSwitch,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winSwitch.localWinReq -> winRqArbiter.thr_arbiter.localWinReq,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_arbiter,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winRqArbiter.thr_arbiter.winReq -> winController.thr_control.winReq,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow dWinSubSysFA.f1 (Async)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device currentSensor,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection currentSensor.current -> winController.thr_control.current,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow dWinSubSysFA.f1 (Sync)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device currentSensor,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection currentSensor.current -> winController.thr_control.current,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow dWinSubSysFA.f2 (Async)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device positionSensor,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection positionSensor.position -> pinchDetection.thr_pinchDetect.position,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_pinchDetect,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection pinchDetection.thr_pinchDetect.object -> winController.thr_control.object,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow dWinSubSysFA.f2 (Sync)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device positionSensor,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection positionSensor.position -> pinchDetection.thr_pinchDetect.position,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_pinchDetect,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection pinchDetection.thr_pinchDetect.object -> winController.thr_control.object,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow pWinSubSysFA.f0 (Async)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device passWinSwitch,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection passWinSwitch.localWinReq -> winRqArbiter.thr_arbiter.localWinReq,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_arbiter,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winRqArbiter.thr_arbiter.winReq -> winController.thr_control.winReq,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow pWinSubSysFA.f0 (Sync)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device passWinSwitch,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection passWinSwitch.localWinReq -> winRqArbiter.thr_arbiter.localWinReq,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_arbiter,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winRqArbiter.thr_arbiter.winReq -> winController.thr_control.winReq,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow pWinSubSysFA.f1 (Async)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device currentSensor,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection currentSensor.current -> winController.thr_control.current,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow pWinSubSysFA.f1 (Sync)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device currentSensor,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection currentSensor.current -> winController.thr_control.current,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow pWinSubSysFA.f2 (Async)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device positionSensor,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection positionSensor.position -> pinchDetection.thr_pinchDetect.position,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_pinchDetect,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection pinchDetection.thr_pinchDetect.object -> winController.thr_control.object,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow pWinSubSysFA.f2 (Sync)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device positionSensor,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection positionSensor.position -> pinchDetection.thr_pinchDetect.position,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_pinchDetect,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection pinchDetection.thr_pinchDetect.object -> winController.thr_control.object,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow pWinSubSysFA.f3 (Async)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device driverWinSwitch,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection driverWinSwitch.localWinReq -> winRqArbiter.thr_arbiter.secWinReq,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_arbiter,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winRqArbiter.thr_arbiter.winReq -> winController.thr_control.winReq,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+
+Flow analysis for end to end flow pWinSubSysFA.f3 (Sync)
+Contributor,Min Specified,Min Value,Min Method,Max Specified,Max Value,Max Method,Comments,
+Device driverWinSwitch,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection driverWinSwitch.localWinReq -> winRqArbiter.thr_arbiter.secWinReq,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_arbiter,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winRqArbiter.thr_arbiter.winReq -> winController.thr_control.winReq,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_control,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection winController.thr_control.winCmd -> motorDrive.thr_motorDrive.cmd,,0.0ms,no latency,,0.0ms,no latency,
+Thread thr_motorDrive,,0.0ms,no latency,,0.0ms,no latency,
+Sampled Connection motorDrive.thr_motorDrive.drive_power -> winMotor.drive_power,,0.0ms,no latency,,0.0ms,no latency,
+Device winMotor,,0.0ms,no latency,,0.0ms,no latency,
+Latency Total,0.0ms,0.0ms,,0.0ms,0.0ms,,
+End to End Latency,,0.0ms,,,0.0ms,,
+End to end Latency Summary,
+WARNING,Minimum end to end latency is not pecified or zero,
+WARNING,End to end latency is not specified,
+
+
+

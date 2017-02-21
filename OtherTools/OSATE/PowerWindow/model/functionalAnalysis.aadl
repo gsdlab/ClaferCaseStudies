@@ -1,0 +1,223 @@
+-- This package contains the functional analysis of the power window.
+-- Due to the nature of the granularity of AADL we must model threads.
+-- Since we are not interested in modeling threads we simply treat the
+-- thread and process as the same for the software function. We also
+-- some of the device here do to the fact that we want to model the
+-- flows at this analysis level.
+package PowerWindow::functionalAnalysis
+
+public
+
+-------------------------------------------------------------------------------
+--                    Window Switch (Device)
+-------------------------------------------------------------------------------
+device WinSwitch
+features
+	localWinReq : out data port;
+flows
+	f0: flow source localWinReq;
+end WinSwitch;
+
+device implementation WinSwitch.dumb
+end WinSwitch.dumb;
+
+-------------------------------------------------------------------------------
+--                    Window Request Arbiter - Single (Function)
+-------------------------------------------------------------------------------
+process WinRqArbiter
+features
+	localWinReq : in data port;
+	winReq : out data port;
+flows
+	f0: flow path localWinReq -> winReq;
+end WinRqArbiter;
+
+process implementation WinRqArbiter.generic
+subcomponents
+	thr_arbiter : thread WinRqArbiter_thr.generic;
+connections
+	c0: port localWinReq -> thr_arbiter.localWinReq;
+	c1: port thr_arbiter.winReq -> winReq;
+flows
+	f0: flow path localWinReq -> c0 -> thr_arbiter.f0 -> c1 -> winReq;
+end WinRqArbiter.generic;
+
+thread WinRqArbiter_thr
+features
+	localWinReq : in data port;
+	winReq : out data port;
+flows
+	f0 : flow path localWinReq -> winReq; 
+end WinRqArbiter_thr;
+
+thread implementation WinRqArbiter_thr.generic
+end WinRqArbiter_thr.generic;
+
+-------------------------------------------------------------------------------
+--                    Window Request Arbiter - Dual (Function)
+-------------------------------------------------------------------------------
+process WinRqArbiterDual extends WinRqArbiter
+features
+	secWinReq : in data port;
+flows
+	f1: flow path secWinReq -> winReq;
+end WinRqArbiterDual;
+
+process implementation WinRqArbiterDual.generic
+subcomponents
+	thr_arbiter : thread WinRqArbiterDual_thr.generic;
+connections
+	c0: port localWinReq -> thr_arbiter.localWinReq;
+	c1: port secwinReq -> thr_arbiter.secWinReq;
+	c2: port thr_arbiter.winReq -> winReq;
+flows
+	f0: flow path localWinReq -> c0 -> thr_arbiter.f0 -> c2 -> winReq;
+	f1: flow path secWinReq -> c1 -> thr_arbiter.f1 -> c2 -> winReq;
+end WinRqArbiterDual.generic;
+
+thread WinRqArbiterDual_thr extends WinRqArbiter_thr
+features
+	secWinReq : in data port;
+flows
+	f1: flow path secWinReq -> winReq;
+end WinRqArbiterDual_thr;
+
+thread implementation WinRqArbiterDual_thr.generic
+end WinRqArbiterDual_thr.generic;
+
+-------------------------------------------------------------------------------
+--                    Window Controller (Function)
+-------------------------------------------------------------------------------
+process WinController
+features
+	current : in data port;
+	winReq : in data port;
+	object : in data port;
+	winCmd : out data port;
+flows
+	-- TODO: can we group incoming connections together and make a single flow?
+	f0 : flow path current -> winCmd;
+	f1 : flow path winReq -> winCmd;
+	f2 : flow path object -> winCmd;
+end WinController;
+
+process implementation WinController.generic
+subcomponents
+	thr_control : thread WinController_thr.generic;
+connections
+	c0 : port current -> thr_control.current;
+	c1 : port winReq -> thr_control.winReq;
+	c2 : port object -> thr_control.object;
+	c3 : port thr_control.winCmd -> winCmd;
+flows
+	f0 : flow path current -> c0 -> thr_control.f0 -> c3 -> winCmd;
+	f1 : flow path winReq -> c1 -> thr_control.f1 -> c3 -> winCmd;
+	f2 : flow path object -> c2 -> thr_control.f2 -> c3 -> winCmd;
+end WinController.generic;
+
+thread WinController_thr
+features
+	current : in data port;
+	winReq : in data port;
+	object : in data port;
+	winCmd : out data port;
+flows
+	f0 : flow path current -> winCmd;
+	f1 : flow path winReq -> winCmd;
+	f2 : flow path object -> winCmd;
+end WinController_thr;
+
+thread implementation WinController_thr.generic
+end WinController_thr.generic;
+
+---------------------------------------------------------------------------------
+----                    Motor Drive (Function)
+---------------------------------------------------------------------------------
+process motorDrive
+features
+	cmd : in data port;
+	drive_power : out data port;
+flows
+	f0 : flow path cmd -> drive_power;
+end motorDrive;
+
+process implementation motorDrive.generic
+subcomponents
+	thr_motorDrive : thread motorDrive_thr.generic;
+connections
+	c0 : port cmd -> thr_motorDrive.cmd;
+	c1 : port thr_motorDrive.drive_power -> drive_power;
+flows
+	f0 : flow path cmd -> c0 -> thr_motorDrive.f0 -> c1 -> drive_power;
+end motorDrive.generic;
+
+thread motorDrive_thr
+features
+	cmd : in data port;
+	drive_power : out data port;
+flows
+	f0 : flow path cmd -> drive_power;
+end motorDrive_thr;
+
+thread implementation motorDrive_thr.generic
+end motorDrive_thr.generic;
+
+-------------------------------------------------------------------------------
+--                    Current Sensor (Device)
+-------------------------------------------------------------------------------
+device CurrentSensor
+features
+	current : out data port;
+flows
+	f0: flow source current;
+end CurrentSensor;
+
+device implementation CurrentSensor.generic
+end CurrentSensor.generic;
+
+-------------------------------------------------------------------------------
+--                    Pinch Detection (Function)
+-------------------------------------------------------------------------------
+process PinchDetection
+features
+	position : in data port;
+	object : out data port;
+flows
+	f0 : flow path position -> object;
+end PinchDetection;
+
+process implementation PinchDetection.generic
+subcomponents
+	thr_pinchDetect : thread PinchDetection_thr.generic;
+connections
+	c0 : port position -> thr_pinchDetect.position;
+	c1 : port thr_pinchDetect.object -> object;
+flows
+	f0 : flow path position -> c0 -> thr_pinchDetect.f0 -> c1 -> object;
+end PinchDetection.generic;
+
+thread PinchDetection_thr
+features
+	position : in data port;
+	object : out data port;
+flows
+	f0 : flow path position -> object;
+end PinchDetection_thr;
+
+thread implementation PinchDetection_thr.generic
+end PinchDetection_thr.generic;
+
+-------------------------------------------------------------------------------
+--                    Position Sensor (Device)
+-------------------------------------------------------------------------------
+device PositionSensor
+features
+	position : out data port;
+flows
+	f0: flow source position;
+end PositionSensor;
+
+device implementation PositionSensor.generic
+end PositionSensor.generic;
+
+end PowerWindow::functionalAnalysis;

@@ -1,0 +1,52 @@
+package PowerWindow::windowMotor
+
+public
+
+with PowerWindow::busses;
+
+device motor
+features
+	drive_power : in data port;
+flows
+	f0 : flow sink drive_power;
+end motor;
+
+device implementation motor.basic
+end motor.basic;
+
+process motorDrive
+features
+	cmd : in data port;
+	drive_power : out data port;
+flows
+	f0 : flow path cmd -> drive_power;
+end motorDrive;
+
+process implementation motorDrive.basic
+end motorDrive.basic;
+
+thread motorDrive_thr
+features
+	cmd : in data port;
+	drive_power : out data port;
+flows
+	f0 : flow path cmd -> drive_power;
+end motorDrive_thr;
+
+thread implementation motorDrive_thr.basic
+end motorDrive_thr.basic;
+
+-- This is a special purpose ECU to model the fact that the motor is a smart
+-- device.
+processor ecu
+features
+	serial_bus : requires bus access PowerWindow::busses::serial;
+end ecu;
+
+processor implementation ecu.basic
+end ecu.basic;
+
+system winMotor
+end winMotor;
+
+end PowerWindow::windowMotor;

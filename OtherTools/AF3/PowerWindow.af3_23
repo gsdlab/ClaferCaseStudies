@@ -1,0 +1,940 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org-fortiss-af3-project:FileProject xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:org-fortiss-af3-bounds="http://www.fortiss.org/af3/bounds" xmlns:org-fortiss-af3-component="http://www.fortiss.org/af3/component" xmlns:org-fortiss-af3-component-annotation="http://www.fortiss.org/af3/component/annotation" xmlns:org-fortiss-af3-efficientdeployment="http://www.fortiss.org/af3/efficientdeployment" xmlns:org-fortiss-af3-expression="http://www.fortiss.org/af3/expression" xmlns:org-fortiss-af3-expression-terms="http://www.fortiss.org/af3/expression/terms" xmlns:org-fortiss-af3-expression-types="http://www.fortiss.org/af3/expression/types" xmlns:org-fortiss-af3-platform="http://www.fortiss.org/af3/platform" xmlns:org-fortiss-af3-platform-annotation="http://www.fortiss.org/af3/platform/annotation" xmlns:org-fortiss-af3-platform-generic="http://www.fortiss.org/af3/platform/generic" xmlns:org-fortiss-af3-project="http://www.fortiss.org/af3/project" xmlns:org-fortiss-af3-project-configuration="http://www.fortiss.org/af3/project/configuration" xmlns:org-fortiss-af3-project-development="http://www.fortiss.org/af3/project/development" xmlns:org-fortiss-af3-safety-annotation="http://www.fortiss.org/af3/safety/annotation" xmlns:org-fortiss-af3-timing-annotation="http://www.fortiss.org/af3/timing/annotation" xmlns:org-fortiss-tooling-base-model-layout="http://www.fortiss.org/tooling/base/model/layout" xmi:id="0" name="PowerWindow">
+  <rootElements xsi:type="org-fortiss-af3-project:ProjectConfiguration" xmi:id="1" id="1">
+    <configurationElements xsi:type="org-fortiss-af3-project-configuration:TypeSystemConfiguration" xmi:id="2" id="2">
+      <typesystem xsi:type="org-fortiss-af3-expression:MicroTypeSystem"/>
+    </configurationElements>
+    <configurationElements xsi:type="org-fortiss-af3-project-configuration:DevelopmentProcessConfiguration" xmi:id="3" id="3">
+      <development xsi:type="org-fortiss-af3-project-development:DummyDevelopmentProcess"/>
+    </configurationElements>
+  </rootElements>
+  <rootElements xsi:type="org-fortiss-af3-component:ComponentArchitecture" xmi:id="5" id="5" name="Functional Architecture - ExpressUp">
+    <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="6" id="6" name="Functional Architecture - ExpressUp" comment="">
+      <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="12" id="12" name="WinSwitch">
+        <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="13" id="13"/>
+        <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="14" id="14"/>
+        <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="15" id="15"/>
+        <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="16" id="16"/>
+        <connectors xsi:type="org-fortiss-af3-component:OutputPort" xmi:id="61" id="61" name="Output" comment="" outgoing="65">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="62" id="62">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="111" id="111" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="EAST"/>
+        </connectors>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="96" y="168"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="145" height="72"/>
+      </containedElements>
+      <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="25" id="25" name="WinArbiter" comment="">
+        <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="26" id="26"/>
+        <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="27" id="27"/>
+        <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="28" id="28"/>
+        <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="29" id="29"/>
+        <connectors xsi:type="org-fortiss-af3-component:InputPort" xmi:id="63" id="63" name="Input" comment="" incoming="65">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="64" id="64">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="112" id="112" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="WEST"/>
+        </connectors>
+        <connectors xsi:type="org-fortiss-af3-component:OutputPort" xmi:id="70" id="70" name="Output" comment="" outgoing="74">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="71" id="71">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="113" id="113" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="EAST"/>
+        </connectors>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="312" y="168"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="133" height="72"/>
+      </containedElements>
+      <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="30" id="30" name="WinControl" comment="">
+        <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="31" id="31"/>
+        <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="32" id="32"/>
+        <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="33" id="33"/>
+        <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="34" id="34"/>
+        <connectors xsi:type="org-fortiss-af3-component:InputPort" xmi:id="72" id="72" name="Input" comment="" incoming="74">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="73" id="73">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="114" id="114" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="WEST"/>
+        </connectors>
+        <connectors xsi:type="org-fortiss-af3-component:OutputPort" xmi:id="79" id="79" name="Output" comment="" outgoing="83">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="80" id="80">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="115" id="115" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="EAST"/>
+        </connectors>
+        <connectors xsi:type="org-fortiss-af3-component:InputPort" xmi:id="90" id="90" name="Input1" comment="" incoming="92">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="91" id="91">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="116" id="116" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="84" orientation="SOUTH"/>
+        </connectors>
+        <connectors xsi:type="org-fortiss-af3-component:InputPort" xmi:id="99" id="99" name="Input2" comment="" incoming="101">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="100" id="100">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="117" id="117" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="60" orientation="SOUTH"/>
+        </connectors>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="492" y="168"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="145" height="72"/>
+      </containedElements>
+      <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="35" id="35" name="WinMotor" comment="">
+        <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="36" id="36"/>
+        <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="37" id="37"/>
+        <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="38" id="38"/>
+        <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="39" id="39"/>
+        <connectors xsi:type="org-fortiss-af3-component:InputPort" xmi:id="81" id="81" name="Input" comment="" incoming="83">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="82" id="82">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="118" id="118" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="WEST"/>
+        </connectors>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="684" y="168"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="133" height="72"/>
+      </containedElements>
+      <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="40" id="40" name="CurrentSensor" comment="">
+        <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="41" id="41"/>
+        <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="42" id="42"/>
+        <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="43" id="43"/>
+        <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="44" id="44"/>
+        <connectors xsi:type="org-fortiss-af3-component:OutputPort" xmi:id="88" id="88" name="Output" comment="" outgoing="92">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="89" id="89">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="119" id="119" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="WEST"/>
+        </connectors>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="648" y="276"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="169" height="72"/>
+      </containedElements>
+      <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="45" id="45" name="PinchDetection" comment="">
+        <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="46" id="46"/>
+        <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="47" id="47"/>
+        <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="48" id="48"/>
+        <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="49" id="49"/>
+        <connectors xsi:type="org-fortiss-af3-component:OutputPort" xmi:id="97" id="97" name="Output" comment="" outgoing="101">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="98" id="98">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="120" id="120" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="EAST"/>
+        </connectors>
+        <connectors xsi:type="org-fortiss-af3-component:InputPort" xmi:id="108" id="108" name="Input" comment="" incoming="110">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="109" id="109">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="121" id="121" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="WEST"/>
+        </connectors>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="384" y="276"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="157" height="72"/>
+      </containedElements>
+      <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="50" id="50" name="PositionSensor" comment="">
+        <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="51" id="51"/>
+        <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="52" id="52"/>
+        <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="53" id="53"/>
+        <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="54" id="54"/>
+        <connectors xsi:type="org-fortiss-af3-component:OutputPort" xmi:id="106" id="106" name="Output" comment="" outgoing="110">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="107" id="107">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="122" id="122" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="EAST"/>
+        </connectors>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="168" y="276"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="157" height="72"/>
+      </containedElements>
+      <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="7" id="7"/>
+      <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="8" id="8"/>
+      <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="17" id="17"/>
+      <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="18" id="18"/>
+      <connections xsi:type="org-fortiss-af3-component:Channel" xmi:id="65" id="65" name="localWinReq" comment="" source="61" target="63">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+      </connections>
+      <connections xsi:type="org-fortiss-af3-component:Channel" xmi:id="74" id="74" name="winReq" comment="" source="70" target="72">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+      </connections>
+      <connections xsi:type="org-fortiss-af3-component:Channel" xmi:id="83" id="83" name="winCmd" comment="" source="79" target="81">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+      </connections>
+      <connections xsi:type="org-fortiss-af3-component:Channel" xmi:id="92" id="92" name="current" comment="" source="88" target="90">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points">
+          <points x="588" y="312"/>
+        </layoutData>
+      </connections>
+      <connections xsi:type="org-fortiss-af3-component:Channel" xmi:id="101" id="101" name="object" comment="" source="97" target="99">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points">
+          <points x="564" y="312"/>
+        </layoutData>
+      </connections>
+      <connections xsi:type="org-fortiss-af3-component:Channel" xmi:id="110" id="110" name="position" comment="" source="106" target="108">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+      </connections>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+    </containedElements>
+    <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="19" id="19"/>
+  </rootElements>
+  <rootElements xsi:type="org-fortiss-af3-platform:PlatformArchitecture" xmi:id="123" id="123" name="Hardware Architecture - Smart with DoorModule" comment="">
+    <containedElements xsi:type="org-fortiss-af3-platform-generic:GenericExecutionUnit" xmi:id="208" id="208" name="BCM">
+      <specifications xsi:type="org-fortiss-af3-platform-annotation:MemorySize" xmi:id="251" id="251"/>
+      <connectors xsi:type="org-fortiss-af3-platform-generic:GenericTransceiver" xmi:id="215" id="215" name="Generic_BusController" outgoing="220">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="108" orientation="SOUTH"/>
+      </connectors>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="288" y="180"/>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="217" height="109"/>
+    </containedElements>
+    <containedElements xsi:type="org-fortiss-af3-platform-generic:GenericExecutionUnit" xmi:id="212" id="212" name="Switch">
+      <specifications xsi:type="org-fortiss-af3-platform-annotation:MemorySize" xmi:id="252" id="252"/>
+      <connectors xsi:type="org-fortiss-af3-platform-generic:GenericTransceiver" xmi:id="217" id="217" name="Generic_BusController" outgoing="221">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="72" orientation="SOUTH"/>
+      </connectors>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="60" y="192"/>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="157" height="85"/>
+    </containedElements>
+    <containedElements xsi:type="org-fortiss-af3-platform-generic:GenericTransmissionUnit" xmi:id="213" id="213" name="localDoorBus">
+      <specifications xsi:type="org-fortiss-af3-timing-annotation:TransmissionUnitBandwidth" xmi:id="214" id="214" bandwidth_MBytesPerSecond="256.0"/>
+      <connectors xsi:type="org-fortiss-af3-platform-generic:GenericTransceiver" xmi:id="216" id="216" name="Generic_BusController" incoming="220 221 222">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="96"/>
+      </connectors>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="300" y="348"/>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="193" height="72"/>
+    </containedElements>
+    <containedElements xsi:type="org-fortiss-af3-platform-generic:GenericExecutionUnit" xmi:id="218" id="218" name="Motor">
+      <specifications xsi:type="org-fortiss-af3-platform-annotation:MemorySize" xmi:id="253" id="253"/>
+      <connectors xsi:type="org-fortiss-af3-platform-generic:GenericTransceiver" xmi:id="219" id="219" name="Generic_BusController" outgoing="222">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="60" orientation="SOUTH"/>
+      </connectors>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="612" y="192"/>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="145" height="85"/>
+    </containedElements>
+    <connections xsi:type="org-fortiss-af3-platform:TransmissionConnection" xmi:id="220" id="220" name="" comment="" source="215" target="216">
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+    </connections>
+    <connections xsi:type="org-fortiss-af3-platform:TransmissionConnection" xmi:id="221" id="221" name="" comment="" source="217" target="216">
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+    </connections>
+    <connections xsi:type="org-fortiss-af3-platform:TransmissionConnection" xmi:id="222" id="222" name="" comment="" source="219" target="216">
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+    </connections>
+  </rootElements>
+  <rootElements xsi:type="org-fortiss-af3-component:ComponentArchitecture" xmi:id="124" id="124" name="Copy of Functional Architecture - ExpressUp">
+    <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="125" id="125" name="Functional Architecture - No Express" comment="">
+      <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="126" id="126" name="WinSwitch">
+        <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="127" id="127"/>
+        <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="128" id="128"/>
+        <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="129" id="129"/>
+        <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="130" id="130"/>
+        <connectors xsi:type="org-fortiss-af3-component:OutputPort" xmi:id="131" id="131" name="Output" comment="" outgoing="201">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="132" id="132">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="133" id="133" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="EAST"/>
+        </connectors>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="96" y="168"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="145" height="72"/>
+      </containedElements>
+      <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="134" id="134" name="WinArbiter" comment="">
+        <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="135" id="135"/>
+        <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="136" id="136"/>
+        <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="137" id="137"/>
+        <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="138" id="138"/>
+        <connectors xsi:type="org-fortiss-af3-component:InputPort" xmi:id="139" id="139" name="Input" comment="" incoming="201">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="140" id="140">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="141" id="141" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="WEST"/>
+        </connectors>
+        <connectors xsi:type="org-fortiss-af3-component:OutputPort" xmi:id="142" id="142" name="Output" comment="" outgoing="202">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="143" id="143">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="144" id="144" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="EAST"/>
+        </connectors>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="312" y="168"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="133" height="72"/>
+      </containedElements>
+      <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="145" id="145" name="WinControl" comment="">
+        <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="146" id="146"/>
+        <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="147" id="147"/>
+        <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="148" id="148"/>
+        <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="149" id="149"/>
+        <connectors xsi:type="org-fortiss-af3-component:InputPort" xmi:id="150" id="150" name="Input" comment="" incoming="202">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="151" id="151">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="152" id="152" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="WEST"/>
+        </connectors>
+        <connectors xsi:type="org-fortiss-af3-component:OutputPort" xmi:id="153" id="153" name="Output" comment="" outgoing="203">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="154" id="154">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="155" id="155" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="EAST"/>
+        </connectors>
+        <connectors xsi:type="org-fortiss-af3-component:InputPort" xmi:id="156" id="156" name="Input1" comment="" incoming="204">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="157" id="157">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="158" id="158" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="84" orientation="SOUTH"/>
+        </connectors>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="492" y="168"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="145" height="72"/>
+      </containedElements>
+      <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="162" id="162" name="WinMotor" comment="">
+        <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="163" id="163"/>
+        <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="164" id="164"/>
+        <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="165" id="165"/>
+        <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="166" id="166"/>
+        <connectors xsi:type="org-fortiss-af3-component:InputPort" xmi:id="167" id="167" name="Input" comment="" incoming="203">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="168" id="168">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="169" id="169" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="WEST"/>
+        </connectors>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="684" y="168"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="133" height="72"/>
+      </containedElements>
+      <containedElements xsi:type="org-fortiss-af3-component:Component" xmi:id="170" id="170" name="CurrentSensor" comment="">
+        <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="171" id="171"/>
+        <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="172" id="172"/>
+        <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="173" id="173"/>
+        <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="174" id="174"/>
+        <connectors xsi:type="org-fortiss-af3-component:OutputPort" xmi:id="175" id="175" name="Output" comment="" outgoing="204">
+          <specifications xsi:type="org-fortiss-af3-component:PortSpecification" xmi:id="176" id="176">
+            <type xsi:type="org-fortiss-af3-expression-types:TInt"/>
+            <initialValue xsi:type="org-fortiss-af3-expression-terms:DefinedConst" value="NoVal"/>
+          </specifications>
+          <specifications xsi:type="org-fortiss-af3-bounds:VariableBoundsSpecification" xmi:id="177" id="177" upperBound="254" lowerBound="-255"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+          <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="24" orientation="WEST"/>
+        </connectors>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="648" y="276"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="169" height="72"/>
+      </containedElements>
+      <specifications xsi:type="org-fortiss-af3-component:CausalityComponentSpecification" xmi:id="197" id="197"/>
+      <specifications xsi:type="org-fortiss-af3-component:VerifBehaviourComponentSpecification" xmi:id="198" id="198"/>
+      <specifications xsi:type="org-fortiss-af3-component-annotation:MemoryRequirement" xmi:id="199" id="199"/>
+      <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="200" id="200"/>
+      <connections xsi:type="org-fortiss-af3-component:Channel" xmi:id="201" id="201" name="localWinReq" comment="" source="131" target="139">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+      </connections>
+      <connections xsi:type="org-fortiss-af3-component:Channel" xmi:id="202" id="202" name="winReq" comment="" source="142" target="150">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+      </connections>
+      <connections xsi:type="org-fortiss-af3-component:Channel" xmi:id="203" id="203" name="winCmd" comment="" source="153" target="167">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+      </connections>
+      <connections xsi:type="org-fortiss-af3-component:Channel" xmi:id="204" id="204" name="current" comment="" source="175" target="156">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points">
+          <points x="588" y="312"/>
+        </layoutData>
+      </connections>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+    </containedElements>
+    <specifications xsi:type="org-fortiss-af3-safety-annotation:SafetyIntegrityLevel" xmi:id="207" id="207"/>
+  </rootElements>
+  <rootElements xsi:type="org-fortiss-af3-platform:PlatformArchitecture" xmi:id="223" id="223" name="Hardware Architecture - Dumb" comment="">
+    <containedElements xsi:type="org-fortiss-af3-platform-generic:GenericExecutionUnit" xmi:id="237" id="237" name="BCM">
+      <connectors xsi:type="org-fortiss-af3-platform-generic:GenericTransmitter" xmi:id="238" id="238" name="Motor">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="48" orientation="EAST"/>
+      </connectors>
+      <connectors xsi:type="org-fortiss-af3-platform-generic:GenericReceiver" xmi:id="239" id="239" name="Switch">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="48" orientation="WEST"/>
+      </connectors>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="264" y="1092"/>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="217" height="109"/>
+    </containedElements>
+  </rootElements>
+  <rootElements xsi:type="org-fortiss-af3-platform:PlatformArchitecture" xmi:id="224" id="224" name="Hardware Architecture - Smart without DoorModule" comment="">
+    <containedElements xsi:type="org-fortiss-af3-platform-generic:GenericExecutionUnit" xmi:id="225" id="225" name="BCM">
+      <connectors xsi:type="org-fortiss-af3-platform-generic:GenericTransceiver" xmi:id="226" id="226" name="Generic_BusController" outgoing="234">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="108" orientation="SOUTH"/>
+      </connectors>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="288" y="180"/>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="217" height="109"/>
+    </containedElements>
+    <containedElements xsi:type="org-fortiss-af3-platform-generic:GenericExecutionUnit" xmi:id="227" id="227" name="Switch">
+      <connectors xsi:type="org-fortiss-af3-platform-generic:GenericTransceiver" xmi:id="228" id="228" name="Generic_BusController" outgoing="235">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="72" orientation="SOUTH"/>
+      </connectors>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="60" y="192"/>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="157" height="85"/>
+    </containedElements>
+    <containedElements xsi:type="org-fortiss-af3-platform-generic:GenericTransmissionUnit" xmi:id="229" id="229" name="localDoorBus">
+      <specifications xsi:type="org-fortiss-af3-timing-annotation:TransmissionUnitBandwidth" xmi:id="230" id="230" bandwidth_MBytesPerSecond="256.0"/>
+      <connectors xsi:type="org-fortiss-af3-platform-generic:GenericTransceiver" xmi:id="231" id="231" name="Generic_BusController" incoming="234 235 236">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="96"/>
+      </connectors>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="300" y="348"/>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="193" height="72"/>
+    </containedElements>
+    <containedElements xsi:type="org-fortiss-af3-platform-generic:GenericExecutionUnit" xmi:id="232" id="232" name="Motor">
+      <connectors xsi:type="org-fortiss-af3-platform-generic:GenericTransceiver" xmi:id="233" id="233" name="Generic_BusController" outgoing="236">
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="108" height="72"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="cpos"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="cdim" width="0" height="0"/>
+        <layoutData xsi:type="org-fortiss-tooling-base-model-layout:OffsetOrientation" key="coffsetorient" offset="60" orientation="SOUTH"/>
+      </connectors>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Point" key="pos" x="612" y="192"/>
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Dimension" key="dim" width="145" height="85"/>
+    </containedElements>
+    <connections xsi:type="org-fortiss-af3-platform:TransmissionConnection" xmi:id="234" id="234" name="" comment="" source="226" target="231">
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+    </connections>
+    <connections xsi:type="org-fortiss-af3-platform:TransmissionConnection" xmi:id="235" id="235" name="" comment="" source="228" target="231">
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+    </connections>
+    <connections xsi:type="org-fortiss-af3-platform:TransmissionConnection" xmi:id="236" id="236" name="" comment="" source="233" target="231">
+      <layoutData xsi:type="org-fortiss-tooling-base-model-layout:Points" key="points"/>
+    </connections>
+  </rootElements>
+  <rootElements xsi:type="org-fortiss-af3-efficientdeployment:DSE" xmi:id="246" id="246" currentHistory="247">
+    <histories xmi:id="247" id="247" date="2016-06-28T14:58:47.701-0400">
+      <manualPlatformEntry xmi:id="248" id="248" name="Hardware Architecture - Smart with DoorModule" platformArchitectureReference="123">
+        <generatedDeploymentEntries xmi:id="254" id="254" name="Generated Deployment  #01">
+          <efficientDeployment xmi:id="255" id="255" name="Schedule for Generated Deployment" latency="58">
+            <Tasks xmi:id="256" id="256" name="PositionSensor" StartingTime="13" ComputationTime="10" WCET="10" AllocatedNode="10" TopLevelComponent="true" ReferencedComponent="50" OutputSignals="265"/>
+            <Tasks xmi:id="257" id="257" name="WinMotor" StartingTime="48" ComputationTime="10" WCET="10" AllocatedNode="9" TopLevelComponent="true" ReferencedComponent="35" InputSignals="267"/>
+            <Tasks xmi:id="4" id="4" name="CurrentSensor" ComputationTime="10" WCET="10" AllocatedNode="9" TopLevelComponent="true" ReferencedComponent="40" OutputSignals="264"/>
+            <Tasks xmi:id="258" id="258" name="WinArbiter" StartingTime="18" ComputationTime="10" WCET="10" AllocatedNode="9" TopLevelComponent="true" ReferencedComponent="25" InputSignals="266" OutputSignals="263"/>
+            <Tasks xmi:id="259" id="259" name="WinSwitch" StartingTime="1" ComputationTime="10" WCET="10" AllocatedNode="10" TopLevelComponent="true" ReferencedComponent="12" OutputSignals="266"/>
+            <Tasks xmi:id="260" id="260" name="PinchDetection" StartingTime="28" ComputationTime="10" WCET="10" AllocatedNode="9" TopLevelComponent="true" ReferencedComponent="45" InputSignals="265" OutputSignals="262"/>
+            <Tasks xmi:id="261" id="261" name="WinControl" StartingTime="38" ComputationTime="10" WCET="10" AllocatedNode="9" TopLevelComponent="true" ReferencedComponent="30" InputSignals="263 264 262" OutputSignals="267"/>
+            <Nodes xmi:id="9" id="9" name="BCM" AllocatedTasks="257 260 261 258 4" ExecutionUnit="208" BusChannels="24"/>
+            <Nodes xmi:id="10" id="10" name="Switch" AllocatedTasks="256 259" ExecutionUnit="212" BusChannels="24"/>
+            <Nodes xmi:id="11" id="11" name="Motor" ExecutionUnit="218" BusChannels="24"/>
+            <Signals xmi:id="262" id="262" name="Input2_99" SignalComputation="5" BitLength="32" IsLocal="true" DestinationTask="261" SourceTask="260" PortReference="97" AllocatedMessage="268"/>
+            <Signals xmi:id="263" id="263" name="Input_72" SignalComputation="5" BitLength="32" IsLocal="true" DestinationTask="261" SourceTask="258" PortReference="70" AllocatedMessage="269"/>
+            <Signals xmi:id="264" id="264" name="Input1_90" SignalComputation="5" BitLength="32" IsLocal="true" DestinationTask="261" SourceTask="4" PortReference="88" AllocatedMessage="20"/>
+            <Signals xmi:id="265" id="265" name="Input_108" SignalComputation="5" BitLength="32" DestinationTask="260" SourceTask="256" PortReference="106" AllocatedMessage="21"/>
+            <Signals xmi:id="266" id="266" name="Input_63" SignalComputation="5" BitLength="32" DestinationTask="258" SourceTask="259" PortReference="61" AllocatedMessage="22"/>
+            <Signals xmi:id="267" id="267" name="Input_81" SignalComputation="5" BitLength="32" IsLocal="true" DestinationTask="257" SourceTask="261" PortReference="79" AllocatedMessage="23"/>
+            <Messages xmi:id="268" id="268" name="Input2_99" SendingTime="38" Signals="262" BitLength="32"/>
+            <Messages xmi:id="269" id="269" name="Input_72" SendingTime="38" Signals="263" BitLength="32"/>
+            <Messages xmi:id="20" id="20" name="Input1_90" SendingTime="38" Signals="264" BitLength="32"/>
+            <Messages xmi:id="21" id="21" name="Input_108" MessageLength="5" SendingTime="23" Signals="265" BitLength="32"/>
+            <Messages xmi:id="22" id="22" name="Input_63" MessageLength="5" SendingTime="13" Signals="266" BitLength="32"/>
+            <Messages xmi:id="23" id="23" name="Input_81" SendingTime="48" Signals="267" BitLength="32"/>
+            <BusChannels xmi:id="24" id="24" name="localDoorBus" TransmissionUnit="213"/>
+          </efficientDeployment>
+          <generatedScheduleEntries xmi:id="270" id="270" name="Schedule for Generated Deployment #1">
+            <schedule satisfiable="true">
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t5_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="25"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t2_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="30"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t5"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="TASKS!val!3"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t2_sil"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t2_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="20"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t5_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="35"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t6_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="10"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t8_ram"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t6"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="TASKS!val!4"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n10_consumed_memory"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m12_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="5"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t2_node"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="NODES!val!1"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m13_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="45"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t5_node"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="NODES!val!0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t7"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="TASKS!val!5"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n10_num_tasks"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="2"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="end2endLatency"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="58"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t7_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="10"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t5_ram"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m16_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="20"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t5_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="10"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t3_node"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="NODES!val!0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t2_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="10"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m15_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="35"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t2_ram"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m15_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="30"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t8_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="45"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t2"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="TASKS!val!0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t3_sil"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t4"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="TASKS!val!2"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t3_ram"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t8"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="TASKS!val!6"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n10_used"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="false"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="latestTask"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="65"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t7_node"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="NODES!val!0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t8_sil"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n9_consumed_memory"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t6_ram"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t6_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="8"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n11"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="NODES!val!1"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t6_node"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="NODES!val!1"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m16_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="25"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n9"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="NODES!val!0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t3_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="10"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m12_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="45"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m14_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="5"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t8_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="10"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n11_used"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="false"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n10"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="NODES!val!1"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m14_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="45"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t4_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="7"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t7_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="45"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t8_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="55"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t7_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="35"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t6_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="18"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n10_nonidle_time"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="20"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n11_consumed_memory"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m17_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="5"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t4_node"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="NODES!val!0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t3_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="55"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t4_sil"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n9_used"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="false"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n11_num_tasks"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="2"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m17_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="55"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n9_num_tasks"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="5"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t8_node"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="NODES!val!0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t7_ram"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m17_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="55"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t4_ram"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n9_nonidle_time"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="50"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m13_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="5"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m16_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="5"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="earliestTask"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="7"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m12_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="45"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t4_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="10"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t3_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="65"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="n11_nonidle_time"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="20"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m13_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="45"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m14_start"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="45"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="constraint1"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="true"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t4_end"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="17"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t7_sil"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t6_sil"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="m15_duration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="5"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t5_sil"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="0"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="t3"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="TASKS!val!1"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="getUsed"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="Bool (ite (= x!1 NODES!val!0) fals"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="getNode"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="NODES (ite (= x!1 TASKS!val!0) NODES!val!"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="getRAM"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="Int (ite (= x!1 TASKS!val!0)"/>
+              </model>
+              <model>
+                <id xsi:type="org-fortiss-af3-expression-terms:StringConst" value="getDuration"/>
+                <value xsi:type="org-fortiss-af3-expression-terms:StringConst" value="Int (ite (= x!1 TASKS!val!0) 1"/>
+              </model>
+            </schedule>
+          </generatedScheduleEntries>
+        </generatedDeploymentEntries>
+        <deploymentGenerationSettings xmi:id="271" id="271" optimalLatency="true" solverZ3="true"/>
+      </manualPlatformEntry>
+      <manualPlatformEntry xmi:id="249" id="249" name="Hardware Architecture - Dumb" platformArchitectureReference="223"/>
+      <manualPlatformEntry xmi:id="250" id="250" name="Hardware Architecture - Smart without DoorModule" platformArchitectureReference="224"/>
+    </histories>
+  </rootElements>
+</org-fortiss-af3-project:FileProject>

@@ -1,0 +1,136 @@
+package PowerWindow::intergration
+
+public
+
+with PowerWindow::functionalAnalysis;
+with PowerWindow::device_node;
+with PowerWindow::busses;
+
+-------------------------------------------------------------------------------
+--                    Functional Analysis (System)
+-------------------------------------------------------------------------------
+system WinSubSysFA
+end WinSubSysFA;
+
+-- Slide 3
+system implementation WinSubSysFA.pinchDetection
+subcomponents
+	winSwitch : device PowerWindow::functionalAnalysis::WinSwitch.dumb;
+	winRqArbiter : process PowerWindow::functionalAnalysis::WinRqArbiter.generic;
+	winController : process PowerWindow::functionalAnalysis::WinController.generic;
+	currentSensor : device PowerWindow::functionalAnalysis::CurrentSensor.generic;
+	pinchDetection : process PowerWindow::functionalAnalysis::PinchDetection.generic;
+	positionSensor : device PowerWindow::functionalAnalysis::PositionSensor.generic;
+	motorDrive : process PowerWindow::functionalAnalysis::motorDrive.generic;
+	winMotor : device PowerWindow::device_node::motor.basic;
+connections
+	c0 : port winSwitch.localWinReq -> winRqArbiter.localWinReq;
+	c1 : port winRqArbiter.winReq -> winController.winReq;
+	c2 : port pinchDetection.object -> winController.object;
+	c3 : port currentSensor.current -> winController.current;
+	c4 : port positionSensor.position -> pinchDetection.position;
+	c5 : port winController.winCmd -> motorDrive.cmd;
+	c6 : port motorDrive.drive_power -> winMotor.drive_power;
+flows
+	f0 : end to end flow winSwitch.f0 -> c0 -> winRqArbiter.f0 -> c1 -> winController.f1 -> c5 -> motorDrive.f0 -> c6 -> winMotor.f0;
+	f1 : end to end flow currentSensor.f0 -> c3 -> winController.f0 -> c5 -> motorDrive.f0 -> c6 -> winMotor.f0;
+	f2 : end to end flow positionSensor.f0 -> c4 -> pinchDetection.f0 -> c2 -> winController.f2 -> c5 -> motorDrive.f0 -> c6 -> winMotor.f0;
+end WinSubSysFA.pinchDetection;
+
+system implementation WinSubSysFA.passengerPinchDetection
+subcomponents
+	driverWinSwitch : device PowerWindow::functionalAnalysis::WinSwitch.dumb;
+	passWinSwitch : device PowerWindow::functionalAnalysis::WinSwitch.dumb;
+	winRqArbiter : process PowerWindow::functionalAnalysis::WinRqArbiterDual.generic;
+	winController : process PowerWindow::functionalAnalysis::WinController.generic;
+	currentSensor : device PowerWindow::functionalAnalysis::CurrentSensor.generic;
+	pinchDetection : process PowerWindow::functionalAnalysis::PinchDetection.generic;
+	positionSensor : device PowerWindow::functionalAnalysis::PositionSensor.generic;
+	motorDrive : process PowerWindow::functionalAnalysis::motorDrive.generic;
+	winMotor : device PowerWindow::device_node::motor.basic;
+connections
+	c0 : port passWinSwitch.localWinReq -> winRqArbiter.localWinReq;
+	c1 : port winRqArbiter.winReq -> winController.winReq;
+	c2 : port pinchDetection.object -> winController.object;
+	c3 : port currentSensor.current -> winController.current;
+	c4 : port positionSensor.position -> pinchDetection.position;
+	c5 : port winController.winCmd -> motorDrive.cmd;
+	c6 : port motorDrive.drive_power -> winMotor.drive_power;
+	c7 : port driverWinSwitch.localWinReq -> winRqArbiter.secWinReq;
+flows
+	f0 : end to end flow passWinSwitch.f0 -> c0 -> winRqArbiter.f0 -> c1 -> winController.f1 -> c5 -> motorDrive.f0 -> c6 -> winMotor.f0;
+	f1 : end to end flow currentSensor.f0 -> c3 -> winController.f0 -> c5 -> motorDrive.f0 -> c6 -> winMotor.f0;
+	f2 : end to end flow positionSensor.f0 -> c4 -> pinchDetection.f0 -> c2 -> winController.f2 -> c5 -> motorDrive.f0 -> c6 -> winMotor.f0;
+	f3 : end to end flow driverWinSwitch.f0 -> c7 -> winRqArbiter.f1 -> c1 -> winController.f1 -> c5 -> motorDrive.f0 -> c6 -> winMotor.f0;
+end WinSubSysFA.passengerPinchDetection;
+
+-------------------------------------------------------------------------------
+--                    Functional Design - Device Nodes (System)
+-------------------------------------------------------------------------------
+-- We don't include the switch or motor in the device node sub system since they
+-- are in the functional analysis architecture.
+system WinSubSysDN
+end WinSubSysDN;
+
+system implementation WinSubSysDN.generic
+subcomponents
+	doorInline : device PowerWindow::device_node::doorInline.generic;
+	motorEcu : processor PowerWindow::device_node::ecu.basic;
+end WinSubSysDN.generic;
+
+
+-------------------------------------------------------------------------------
+--                    System Architecture (System)
+-------------------------------------------------------------------------------
+system WinSysArch
+end WinSysArch;
+
+-- There is a limitation with breaking down subsystems. This won't work.
+--system implementation WinSysArch.driverPinchDetection
+--subcomponents
+--	dWinSubSysFA : system WinSubSysFA.pinchDetection;
+--	dWinSubSysDN : system WinSubSysDN.generic;
+--	pWinSubSysFA : system WinSubSysFA.passengerPinchDetection;
+--	pWinSubSysDN : system WinSubSysDN.generic;
+--	bcm : processor PowerWindow::device_node::BCM.generic; -- We include the BCM here because it does not reside on the driver or passenger door.
+--	main_can : bus PowerWindow::busses::can.generic; -- This is the main can bus that the BCM, and door inlines are connected to.
+--connections
+--	b0 : bus access dWinSubSysDN.doorInline.can_bus <-> main_can;
+--end WinSysArch.driverPinchDetection;
+
+system implementation WinSysArch.pinchDetection
+subcomponents
+	dWinSubSysFA : system WinSubSysFA.pinchDetection;
+	pWinSubSysFA : system WinSubSysFA.passengerPinchDetection;
+	dDoorInline : device PowerWindow::device_node::doorInline.generic;
+	dMotorEcu : processor PowerWindow::device_node::ecu.basic;
+	pDoorInline : device PowerWindow::device_node::doorInline.generic;
+	pMotorEcu : processor PowerWindow::device_node::ecu.basic;
+	bcm : processor PowerWindow::device_node::BCM.generic; -- We include the BCM here because it does not reside on the driver or passenger door.
+	main_can : bus PowerWindow::busses::can.generic; -- This is the main can bus that the BCM, and door inlines are connected to.
+	main_load_power : bus PowerWindow::busses::power.load_power; -- This is a line from the main power source in the car.
+connections
+	b0 : bus access dDoorInline.can_bus <-> main_can;
+	b1 : bus access pDoorInline.can_bus <-> main_can;
+	b2 : bus access bcm.can_bus <-> main_can;
+--	b3 : bus access dMotorEcu.serial_bus <-> dDoorInline.serial;
+--	b4 : bus access pMotorEcu.serial_bus <-> pDoorInline.serial;
+	b5 : bus access dDoorInline.power_source <-> main_load_power;
+	b6 : bus access pDoorInline.power_source <-> main_load_power;
+	b7 : bus access dMotorEcu.load_power <-> dDoorInline.load_power;
+	b8 : bus access pMotorEcu.load_power <-> pDoorInline.load_power;
+properties
+	-- While this works its incorrect for timing. This is because in this deployment the BCM is running all processes (except motor drive). Thus the device must send data via the
+	-- inline bus then to the main can. This will only take into the consideration the time to send the message via the door inline, not the main can. This
+	-- is exactly the problem of modeling the gateway in the Zeller paper.
+--	Actual_Connection_Binding => (reference (dDoorInline.serial)) applies to dWinSubSysFA.c0, dWinSubSysFA.c3, dWinSubSysFA.c4, dWinSubSysFA.c6;
+	Actual_Connection_Binding => (reference (main_can)) applies to dWinSubSysFA.c0, dWinSubSysFA.c3, dWinSubSysFA.c4, dWinSubSysFA.c6; -- Does this fix the problem?
+--	Actual_Connection_Binding => (reference (pDoorInline.serial)) applies to pWinSubSysFA.c0, pWinSubSysFA.c3, pWinSubSysFA.c4, pWinSubSysFA.c6, pWinSubSysFA.c7;
+	Actual_Connection_Binding => (reference (main_can)) applies to pWinSubSysFA.c0, pWinSubSysFA.c3, pWinSubSysFA.c4, pWinSubSysFA.c6, pWinSubSysFA.c7; -- Does this fix the problem?
+	Actual_Processor_Binding => (reference (dMotorEcu)) applies to dWinSubSysFA.motorDrive;
+	Actual_Processor_Binding => (reference (pMotorEcu)) applies to pWinSubSysFA.motorDrive;
+	Actual_Processor_Binding => (reference (bcm)) applies to dWinSubSysFA.winRqArbiter, dWinSubSysFA.winController, dWinSubSysFA.pinchDetection,
+		pWinSubSysFA.winRqArbiter, pWinSubSysFA.winController, pWinSubSysFA.pinchDetection;
+end WinSysArch.pinchDetection;
+
+end PowerWindow::intergration;

@@ -1,0 +1,80 @@
+-- This package contians the Functional Design - Device Nodes for the power
+-- window. In this configuration we have a smart (has a processor) motor,
+-- a dumb switch, a BCM, and the door inline. The switch is not shown in this package
+-- but rather the functional analysis since it is a dumb switch and does not have a
+-- processor.
+package PowerWindow::device_node
+
+public
+
+with PowerWindow::busses;
+
+
+-------------------------------------------------------------------------------
+--                    Window Motor (Device)
+-------------------------------------------------------------------------------
+device motor
+features
+	drive_power : in data port;
+flows
+	f0 : flow sink drive_power;
+end motor;
+
+device implementation motor.basic
+end motor.basic;
+
+-- This is a special purpose ECU to model the fact that the motor is a smart
+-- device.
+processor ecu
+features
+	serial_bus : requires bus access PowerWindow::busses::serial;
+	load_power : requires bus access PowerWindow::busses::power.load_power;
+end ecu;
+
+processor implementation ecu.basic
+end ecu.basic;
+--system winMotor
+--end winMotor;
+--
+--system implementation winMotor.smart
+--subcomponents
+--	motorDrive : process PowerWindow::windowMotor::motorDrive.basic;
+--	motor : device PowerWindow::windowMotor::motor.basic;
+--	ecu : processor PowerWindow::windowMotor::ecu.basic;
+--connections
+--	c0 : port motorDrive.drive_power -> motor.drive_power;
+--flows
+--	f0 : end to end flow motorDrive.f0 -> c0 -> motor.f0;
+--properties
+--	Actual_Processor_Binding => (reference (ecu)) applies to motorDrive;
+--end winMotor.smart;
+
+-------------------------------------------------------------------------------
+--                    Door Inline (Device)
+-------------------------------------------------------------------------------
+device doorInline
+features
+	load_power : provides bus access PowerWindow::busses::power.load_power;
+	device_power : provides bus access PowerWindow::busses::power.device_power;
+	serial : provides bus access PowerWindow::busses::serial;
+	can_bus : requires bus access PowerWindow::busses::can;
+	power_source : requires bus access PowerWindow::busses::power.load_power;
+end doorInline;
+
+device implementation doorInline.generic
+end doorInline.generic;
+
+-------------------------------------------------------------------------------
+--                    BCM (Processor)
+-------------------------------------------------------------------------------
+-- In reality the BCM would be modeled somewhere else and we would bring it in
+-- here.
+processor BCM
+features
+	can_bus : requires bus access PowerWindow::busses::can;
+end BCM;
+
+processor implementation BCM.generic
+end BCM.generic;
+
+end PowerWindow::device_node;

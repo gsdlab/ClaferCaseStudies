@@ -1,0 +1,27 @@
+package PowerWindow::busses
+
+public
+
+bus serial
+end serial;
+
+bus implementation serial.generic
+end serial.generic;
+
+bus can
+end can;
+
+bus implementation can.generic
+end can.generic;
+
+-- Power wires.
+bus power
+end power;
+
+bus implementation power.device_power
+end power.device_power;
+
+bus implementation power.load_power
+end power.load_power;
+
+end PowerWindow::busses;
