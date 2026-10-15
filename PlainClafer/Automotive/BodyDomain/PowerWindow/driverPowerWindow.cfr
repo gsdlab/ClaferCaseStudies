@@ -1,3 +1,4 @@
+//# OPTIONS --minint=-5000 --maxint=5000
 //---------------------------- Meta-Model Elements --------------------------//
 // Meta-Model Elements - This section contains all meta-model elements that
 // are used to model a general automotive E/E architecture. Most of the 
@@ -90,7 +91,7 @@ abstract DevicePowerConnector : PowerConnector
 abstract HardwareDataConnector : HardwareConnector
     endpoint -> DeviceNode 2..*
     deployedFrom -> FunctionConnector 1..*
-        [this.deployedTo = parent]
+    [all f : deployedFrom | f.deployedTo = this]
     transferTimePerSize -> integer // [us/byte]
         
 abstract DiscreteDataConnector : HardwareDataConnector
@@ -422,8 +423,9 @@ DriverWinSys : System
         SwitchToControlLatency -> integer = SwitchToControlDeviceLatency + SwitchToControlCommLatency/1000
         PositionSensorToControlLatency -> integer = PositionSensorToControlDeviceLatency + PositionSensorToControlCommLatency/1000
         ControlInputDifference -> integer
-        [ControlInputDifference = (max(SwitchToControlLatency.dref, PositionSensorToControlLatency.dref) 
-            - min(SwitchToControlLatency.dref, PositionSensorToControlLatency.dref))]
+        ControlInputMax -> integer = max(SwitchToControlLatency.dref ++ PositionSensorToControlLatency.dref)
+        ControlInputMin -> integer = min(SwitchToControlLatency.dref ++ PositionSensorToControlLatency.dref)
+        [ControlInputDifference = ControlInputMax - ControlInputMin]
 
         // End-to-End Timing Constraint(s)
         [(TimingRequirements.BasicEndToEndLatency) => (SwitchToMotorEndToEndLatency <= TimingRequirements.BasicEndToEndLatency)]

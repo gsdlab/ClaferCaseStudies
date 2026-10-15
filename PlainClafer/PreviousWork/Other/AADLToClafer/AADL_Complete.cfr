@@ -1,3 +1,4 @@
+//# OPTIONS --minint=-100 --maxint=100
 //===============================================
 //===============================================
 // METAMODEL
@@ -652,7 +653,7 @@ abstract compute_desired_speed_acc: compute_desired_speed
     [lead_value_compute_desired_speed_acc in cds_acc_features]
     [#cds_acc_features = 1]
     
-    [Cfeatures = cds_acc_features.ref ++ cds_features.ref]    
+    [Cfeatures = cds_acc_features.dref ++ cds_features.dref]    
     
     [no default_compute_desired_speed_flow]
     default_compute_desired_speed_flow_acc : Flow
@@ -702,7 +703,7 @@ abstract adaptive_cruise_control : cruise_control
     [#acc_features = 1]
     
     [no default_cc_features]    
-    [Cfeatures = cc_features.ref ++ acc_features.ref]
+    [Cfeatures = cc_features.dref ++ acc_features.dref]
     
 // Entire adaptive cruise control System Implementation
 abstract adaptive_cruise_control_impl : cruise_control_impl
@@ -732,7 +733,7 @@ abstract adaptive_cruise_control_impl : cruise_control_impl
     [#acc_connections = 1]
 
     [no default_cc_connections]    
-    [Iconnections = cc_connections.ref ++ acc_connections.ref]    
+    [Iconnections = cc_connections.dref ++ acc_connections.dref]    
     
 //////////////////////////////////////////////////////////////////////
 // Complete systems

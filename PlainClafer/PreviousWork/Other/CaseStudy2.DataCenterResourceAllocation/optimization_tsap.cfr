@@ -1,3 +1,4 @@
+//# OPTIONS --minint=-100 --maxint=100
 //=======================================================
 // Generic model customized to handle time-varied requirements
 //=======================================================
@@ -31,7 +32,7 @@ abstract Resources
 abstract Machine
 
     services -> Service*        // set of services allocated to this machine
-        [this.machine = Machine] // inverse relationship constraint
+    [all s : services | s.machine = this] // inverse relationship constraint
         
     isFree? // boolean showing whether the machine is free or not
     [isFree <=> no services] // being free means no services allocated

@@ -1,3 +1,4 @@
+//# OPTIONS --minint=-5000 --maxint=5000
 //---------------------------- Meta-Model Elements --------------------------//
 // Meta-Model Elements - This section contains all meta-model elements that
 // are used to model a general automotive E/E architecture. Most of the 
@@ -90,7 +91,7 @@ abstract DevicePowerConnector : PowerConnector
 abstract HardwareDataConnector : HardwareConnector
     endpoint -> DeviceNode 2..*
     deployedFrom -> FunctionConnector 1..*
-        [this.deployedTo = parent]
+    [all f : deployedFrom | f.deployedTo = this]
     transferTimePerSize -> integer // [us/byte]
         
 abstract DiscreteDataConnector : HardwareDataConnector
@@ -845,8 +846,9 @@ DoorLockSys : System
             )]
 
         ControlInputDifference -> integer
-        [ControlInputDifference = (max(DriverSwitchToControl.dref, DriverContactToControl.dref, DriverLockSensorToControl.dref) 
-            - min(DriverSwitchToControl.dref, DriverContactToControl.dref, DriverLockSensorToControl.dref))]
+        ControlInputMax -> integer = max(DriverSwitchToControl.dref ++ DriverContactToControl.dref ++ DriverLockSensorToControl.dref)
+        ControlInputMin -> integer = min(DriverSwitchToControl.dref ++ DriverContactToControl.dref ++ DriverLockSensorToControl.dref)
+        [ControlInputDifference = ControlInputMax - ControlInputMin]
 
         PassiveKeyCapacitiveSensorToMotor -> integer ?
         [if (DLockFM.PKE.OutsideDoorHandleSensor.CapacitiveSensor) then (
