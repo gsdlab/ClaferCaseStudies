@@ -15,4 +15,4 @@ This repository contains all published case stuides using [Clafer](http://clafer
 
 * [Alexandr Murashkin](http://gsd.uwaterloo.ca/amurashk)
 * [Jordan Ross](http://gsd.uwaterloo.ca/j25ross)
-* [Michał Antkiewicz](http://gsd.uwaterloo.ca/mantkiew)
+* [Michał Antkiewicz](https://uwaterloo.ca/waterloo-intelligent-systems-engineering-lab/profiles/michal-antkiewicz)
