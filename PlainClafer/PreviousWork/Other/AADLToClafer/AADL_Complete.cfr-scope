@@ -1,0 +1,9 @@
+[
+{"lpqName": "Component::Cfeatures", "scope": 132},
+{"lpqName": "Component::Cflows", "scope": 22},
+{"lpqName": "ComponentImpl::Ifeatures", "scope": 11},
+{"lpqName": "ComponentImpl::Iflows", "scope": 11},
+{"lpqName": "Flow::flowElements", "scope": 234},
+{"lpqName": "SystemImpl::Iconnections", "scope": 99},
+{"lpqName": "SystemImpl::Isubcomponents", "scope": 44}
+]

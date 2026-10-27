@@ -21,6 +21,7 @@ Generating Instances
 --------------------
 1. Build the .cfr file using ``clafer -m choco <model file name>.cfr``
   * Note: The models need integers up to 50,000, so their ``//# OPTIONS`` directive sets the integer range to -50,000..50,000. The generated .js file carries that range to chocosolver.
+  * Note: ``doorLocks.cfr-scope`` and ``powerWindow.cfr-scope`` narrow the scopes of ``endpoint`` and ``deployedFrom`` to what the models can use, which chocosolver 0.5.5 reads from next to the model. See [Scope Files](../../../README.md#scope-files).
 2. Generate instances:
   * The first instance: ``java -Xmx3g -jar <path to chocosolver jar> --file=<model file name>.js -n 1 --output=<instance output file>``
   * All non-optimal instances: ``java -Xmx3g -jar <path to chocosolver jar> --file=<model file name>.js --output=<instance output file>``
