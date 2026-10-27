@@ -8,8 +8,10 @@ See the technical report [Case Studies on E/E Architectures for Power Window and
 
 Dependencies
 ------------
-* [Clafer](https://github.com/gsdlab/clafer) v0.4.3
-* [chocosolver](https://github.com/gsdlab/chocosolver) v0.4.3
+* [Clafer](https://github.com/gsdlab/clafer) v0.5.5
+* [chocosolver](https://github.com/gsdlab/chocosolver) v0.5.5
+
+The models were originally written for Clafer and chocosolver v0.4.3.
 
 Contributers
 ------------
@@ -18,9 +20,13 @@ Contributers
 Generating Instances
 --------------------
 1. Build the .cfr file using ``clafer -m choco <model file name>.cfr``
+  * Note: The models need integers up to 50,000, so their ``//# OPTIONS`` directive sets the integer range to -50,000..50,000. The generated .js file carries that range to chocosolver.
+  * Note: ``doorLocks.cfr-scope`` and ``powerWindow.cfr-scope`` narrow the scopes of ``endpoint`` and ``deployedFrom`` to what the models can use, which chocosolver 0.5.5 reads from next to the model. See [Scope Files](../../../README.md#scope-files).
 2. Generate instances:
-  * All non-optimal instances: ``java -Xmx3g -jar <path to chocosolver jar> --file=<model file name> --maxint=<max int size> --output=<instance output file>``
-    * Note: The java heap needs around 3GB due to the large max integer size.
-    * Note: A max integer of 50,000 is required for the power window models and the door locks model.
-  * All optimal instances: ``java -Xmx3g -jar <path to chocosolver jar> --file=<model file name> --moo --maxint=<max int size> --output=<instance output file>``
-  
+  * The first instance: ``java -Xmx3g -jar <path to chocosolver jar> --file=<model file name>.js -n 1 --output=<instance output file>``
+  * All non-optimal instances: ``java -Xmx3g -jar <path to chocosolver jar> --file=<model file name>.js --output=<instance output file>``
+    * Note: The java heap needs around 3GB due to the large integer range.
+  * All optimal instances: uncomment the optimization goals at the end of the model, build it again, and run ``java -Xmx3g -jar <path to chocosolver jar> --file=<model file name>.js --moo --output=<instance output file>``
+    * Note: The timing requirements (``TimingRequirements``) are optional integers left open for the engineer, so every optimal instance repeats for each of their values. Give them values or remove them, or limit the number of instances with ``-n``.
+    * For example, the single-door model (``driverPowerWindow.cfr``) with ``BasicEndToEndLatency -> integer = 500`` and the other two timing requirements removed (multiplicity ``0``) has 9 optimal instances with a mass of 837, a part cost of 223, a warranty cost of 6452, and a latency margin of 440 to 445, as reported in Table 10 of J. A. Ross et al., "Synthesis and exploration of multi-level, multi-perspective architectures of automotive embedded systems", SoSyM, 2019.
+
