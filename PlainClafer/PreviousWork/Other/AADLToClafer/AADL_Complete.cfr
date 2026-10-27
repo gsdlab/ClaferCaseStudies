@@ -328,11 +328,10 @@ abstract compute_desired_speed : System
         [no Ptype]
         [no Fproperties]    
     
-    cds_features -> Feature *
+    cds_features -> Feature 3
     [ok_to_run_compute_desired_speed in cds_features]
     [instantaneous_velocity_compute_desired_speed in cds_features]
     [desired_speed_compute_desired_speed in cds_features]
-    [#cds_features = 3]
     
     default_cds_features ?
     [default_cds_features => Cfeatures = cds_features]    
@@ -356,7 +355,7 @@ abstract compute_desired_speed : System
         [latency = compute_desired_speed_flow_lat]
         [flowElements = compute_desired_speed_flow_fel1, compute_desired_speed_flow_fel2]
     
-    cds_flows -> Flow *
+    cds_flows -> Flow 1
     [cds_flows = compute_desired_speed_flow]        
     default_cds_flows ?
     [default_cds_flows => Cflows = cds_flows]
@@ -464,7 +463,7 @@ abstract cruise_control : System
         [no Ptype]
         [no Fproperties]
   
-    cc_features -> Feature *
+    cc_features -> Feature 5
     [cc_features = cc_system_on_off, engine_status, brake_status, wheel_pulse, throttle_setting]
         
     default_cc_features ?
@@ -524,12 +523,11 @@ abstract cruise_control_impl : SystemImpl
         default_C_T_S_Int : compute_throttle_setting
             [C_T_S.interface = this]                        
             
-    ccsubcomponents -> AADLMember *
+    ccsubcomponents -> AADLMember 4
     [CC_M in ccsubcomponents]
     [C_V in ccsubcomponents]
     [C_D_S in ccsubcomponents]
     [C_T_S in ccsubcomponents]
-    [#ccsubcomponents = 4]
 
     default_cc_subcomponents ?
     [default_cc_subcomponents => Isubcomponents = ccsubcomponents]        
@@ -582,7 +580,7 @@ abstract cruise_control_impl : SystemImpl
         [start = typecasted_C_T_S_interface.throttle_setting_compute_throttle_setting]
         [end = typecasted_interface.throttle_setting]
 
-    cc_connections -> Connection *
+    cc_connections -> Connection 8
     [cc_connections = cruise_control_impl_C1,cruise_control_impl_C2,cruise_control_impl_C3,cruise_control_impl_C4,cruise_control_impl_C5,cruise_control_impl_C6,cruise_control_impl_C7,cruise_control_impl_C8]
         
     default_cc_connections ?
@@ -649,9 +647,8 @@ abstract compute_desired_speed_acc: compute_desired_speed
         [Ptype = FLOAT]
         [no Fproperties]
 		
-    cds_acc_features -> Feature *
+    cds_acc_features -> Feature 1
     [lead_value_compute_desired_speed_acc in cds_acc_features]
-    [#cds_acc_features = 1]
     
     [Cfeatures = cds_acc_features.dref ++ cds_features.dref]    
     
@@ -698,9 +695,8 @@ abstract adaptive_cruise_control : cruise_control
         [no Ptype]
         [no Fproperties]
     
-    acc_features -> Feature *
+    acc_features -> Feature 1
     [lead_value_adaptive_cruise_control in acc_features]
-    [#acc_features = 1]
     
     [no default_cc_features]    
     [Cfeatures = cc_features.dref ++ acc_features.dref]
@@ -728,9 +724,8 @@ abstract adaptive_cruise_control_impl : cruise_control_impl
         [start = typecasted_acc_interface.lead_value_adaptive_cruise_control]
         [end = typecasted_C_D_S_acc_interface.lead_value_compute_desired_speed_acc]
 
-    acc_connections -> Connection *
+    acc_connections -> Connection 1
     [C9 in acc_connections]
-    [#acc_connections = 1]
 
     [no default_cc_connections]    
     [Iconnections = cc_connections.dref ++ acc_connections.dref]    

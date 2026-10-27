@@ -1,4 +1,4 @@
-//# OPTIONS --minint=-5000 --maxint=5000
+//# OPTIONS --minint=-50000 --maxint=50000
 //---------------------------- Meta-Model Elements --------------------------//
 // Meta-Model Elements - This section contains all meta-model elements that
 // are used to model a general automotive E/E architecture. Most of the 
