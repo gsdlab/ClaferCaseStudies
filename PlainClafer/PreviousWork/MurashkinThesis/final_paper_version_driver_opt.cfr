@@ -34,11 +34,11 @@ abstract Device
   smart ?
   [smart => electronic]
   deployedFrom -> AnalysisFunction *
-  [all f : deployedFrom | f.deployedTo = this]
+    [this.deployedTo = parent]
 
 abstract AnalysisFunction
   deployedTo -> Device
-  [this in deployedTo.deployedFrom]
+    [parent in this.deployedFrom]
 
 abstract FunctionalDevice : AnalysisFunction
 

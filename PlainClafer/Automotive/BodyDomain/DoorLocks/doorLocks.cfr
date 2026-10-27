@@ -91,7 +91,7 @@ abstract DevicePowerConnector : PowerConnector
 abstract HardwareDataConnector : HardwareConnector
     endpoint -> DeviceNode 2..*
     deployedFrom -> FunctionConnector 1..*
-    [all f : deployedFrom | f.deployedTo = this]
+        [this.deployedTo = parent]
     transferTimePerSize -> integer // [us/byte]
         
 abstract DiscreteDataConnector : HardwareDataConnector
@@ -846,9 +846,8 @@ DoorLockSys : System
             )]
 
         ControlInputDifference -> integer
-        ControlInputMax -> integer = max(DriverSwitchToControl.dref ++ DriverContactToControl.dref ++ DriverLockSensorToControl.dref)
-        ControlInputMin -> integer = min(DriverSwitchToControl.dref ++ DriverContactToControl.dref ++ DriverLockSensorToControl.dref)
-        [ControlInputDifference = ControlInputMax - ControlInputMin]
+        [ControlInputDifference = (max(DriverSwitchToControl.dref, DriverContactToControl.dref, DriverLockSensorToControl.dref) 
+            - min(DriverSwitchToControl.dref, DriverContactToControl.dref, DriverLockSensorToControl.dref))]
 
         PassiveKeyCapacitiveSensorToMotor -> integer ?
         [if (DLockFM.PKE.OutsideDoorHandleSensor.CapacitiveSensor) then (

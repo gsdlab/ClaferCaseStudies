@@ -28,7 +28,7 @@ abstract Resources: Requirements
 abstract Machine
 
     services -> Service*        // set of services allocated to this machine
-    [all s : services | s.machine = this] // inverse relationship constraint
+        [this.machine = Machine] // inverse relationship constraint
         
     isFree? // boolean showing whether the machine is free or not
     [isFree <=> no services] // being free means no services allocated

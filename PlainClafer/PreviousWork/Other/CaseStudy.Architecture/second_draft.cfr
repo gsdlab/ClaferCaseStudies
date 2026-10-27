@@ -18,7 +18,7 @@ abstract SoftwareComponent: Component
 
 abstract HardwareComponent: Component
     software -> SoftwareComponent* // the software it contains
-    [all s : software | s.target = this] // inverse relationship constraint
+        [this.target = HardwareComponent] // inverse relationship constraint
 
     mappable?
     [no mappable => no software]
@@ -30,7 +30,7 @@ abstract Bus : HardwareComponent
     [no mappable]
     capacity ->> integer
     flows -> Flow* // an inverse sowing what flows the bus implements
-    [all s : flows | s.bus = this]  // inverse relationship constraint
+        [this.bus = Bus]  // inverse relationship constraint
 
     components -> HardwareComponent* // the components the bus connects
     [components = (if (#flows > 0) then (flows.start.target ++ flows.end.target) else emptyHardwareSet)]
